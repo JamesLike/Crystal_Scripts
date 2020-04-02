@@ -25,8 +25,8 @@ if [ ! -f $pdb ]; then
 fi
 
 echo "Running generate_FC.."
-base=`echo $pdb | sed -e 's/\.pdb$//'`
-mtz=`echo $pdb | sed -e 's/\.pdb$/_SFALL.mtz/'`
+base=$(echo $pdb | sed -e 's/\.pdb$//')
+mtz=$(echo $pdb | sed -e 's/\.pdb$/_SFALL.mtz/')
 
 sfall XYZIN ${pdb} HKLOUT ${mtz} > ${base}_sfall_out.html << EOF
 labout  FC=FC_ALL PHIC=PHIC_ALL

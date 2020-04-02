@@ -7,6 +7,8 @@
 
 #Inputs
 loc="/home/james/scripts/diff_maps"
+if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
+
 if [  "X$#" == "X8" ] ; then
 	dark_model=$1
 	dark_FC=$2
@@ -25,14 +27,6 @@ fi
 
 echo 'Running map_generate'
 
-#	dark_model=
-#	dark_FC=
-#	dark_obs=
-#	light_obs=
-#	high_res=
-#	low_res=
-#	name=
-
 #Outputs
 phenix_multiscale=$name"_phenix_multiscale.mtz"
 
@@ -41,7 +35,7 @@ ${loc}/make_dmap4_James_edited.sh $dark_model $dark_FC $dark_obs $light_obs $res
 
 
 #2: Phneix multiscale
-phenix.fobs_minus_fobs_map f_obs_1_file=$light_obs f_obs_2_file=$dark_obs f_obs_1_label=F,SIGF f_obs_2_label=F,SIGF phase_source=$dark_model multiscale=True output_file=$phenix_multiscale
+phenix.fobs_minus_fobs_map f_obs_1_file=$light_obs f_obs_2_file=$dark_obs f_obs_1_label=F,SIGF f_obs_2_label=F,SIGF phase_source=$dark_model multiscale=True output_file=$phenix_multiscale high_res=${res_high}
 phenix.mtz2map mtz_file=$phenix_multiscale #This actually has two options for how it scales the map - either by sigmas (the defult) of by volume (alterntive options it seems not to make a diffrence which is used. 
 rm -f logfile.log tmp.hkl tmp.mtz
 # 3. Phenix multiscale scaling with marius maps 

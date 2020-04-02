@@ -73,7 +73,7 @@ dark_FC=$(echo $dark_model | sed -e 's/\.pdb$/_SFALL.mtz/')
 # Generate Fo from the dark Is
 # Then do some organisation
 ######################################
-/mnt/data4/XFEL/LR23/DED_tests/scripts/trunc_all_options.sh $dark_obs $res_high $res_low "$cell"
+${loc}/scripts/trunc_all_options.sh $dark_obs $res_high $res_low "$cell"
 cp $dark_model .
 cp $dark_obs .
 cp $dark_FC .
@@ -101,7 +101,7 @@ do
   ######################################
   ${loc}/trunc_all_options.sh $f $res_high $res_low "$cell"
   ${loc}/map_generate.sh $dark_model $dark_FC $dark_obs ./${name}${trunc_type} $name $res_high $res_low "$cell" >> map.log
-  ${loc}/make_phenix_q_weight.sh $dark_model $dark_FC $dark_obs ./${name}${trunc_type} "$cell"
+  ${loc}/own_scales/make_phenix_q_weight.sh $dark_model $dark_FC $dark_obs ./${name}${trunc_type} "$cell"
   ${loc}/Extrap_maps_marius.sh "$cell"
 
   ######################################
