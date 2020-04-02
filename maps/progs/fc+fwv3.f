@@ -1,0 +1,150 @@
+C PROGRAM TO ADD TWO DATA SETS WITHOUT PHASES
+C USED TO ADD WEIGHTED DIFFERENCE AMPLITUDES TO FCs.
+C FCs ARE PREFERRED BECAUSE THE PROVIDE THE BEST
+C CHEMICAL INFORMATION YOU CAN INTRODUCE
+C 
+C 
+C
+C TYPICAL INPUT FILE
+C ../process/DATA_SETS/PYP_6D.phs                                INPUT FCS OF GROUND STATE
+C ../process/DATA_SETS/PYP_500us_6D_w2.phs                       INPUT F (IF WEIGHTED NO SIGMAS AVAIL.) 
+C ../process/DATA_SETS/PYP_13_500us_sm.hkl                       SIGMAS
+C 500us_6D.hkl                                                   OUTPUT FOR CNS
+C 500us_6D.phs                                                   OUTPUT FOR XTALVIEW 
+C 5          							 5 TIMES DF ADDED 
+C
+C SIGMAS: SIGMAOUT= SQRT(S1)*SIGMA(DELTAF) 
+           DIMENSION FINS(-80:80,-80:80,-80:80,3)
+           CHARACTER*80 FIL1,FIL2,FIL3,OFIL,PFIL
+
+           DO 50 I=-80,80
+            DO 50 J=-80,80
+             DO 50 K=-80,80
+             FINS(I,J,K,1)=-10.0
+ 50        CONTINUE 
+ 
+           WRITE(*,100) 'CALC. STRUCT. FACTORS GROUND STATE    : '
+           READ(*,200) FIL1
+           WRITE(*,*) FIL1(1:40)
+           WRITE(*,100) 'DIFFERENCE AMPLITUDES AND WEIGHT      : '
+           READ(*,200) FIL2 
+           WRITE(*,*) FIL2(1:40)
+           WRITE(*,100) 'SIGMA OF DIFFERENCE AMPLITUDES        : '
+           READ(*,200) FIL3 
+           WRITE(*,*) FIL3(1:40)
+           WRITE(*,100) 'PURE LIGHT AMPLITUDES, SIGMAS OUTPUT  : '
+           READ(*,200) OFIL
+           WRITE(*,*) OFIL(1:40)
+           WRITE(*,100) 'PURE LIGHT AMPLITUDES, PHASES OUTPUT  : '
+           READ(*,200) PFIL
+           WRITE(*,*) PFIL(1:40)
+ 100       FORMAT(A,$)
+ 200       FORMAT(A)
+
+
+C TIME RESOLVED DATA SET (DATA SET 1) WILL BE READ IN LATER TO PRESERVE ORDER
+C
+           OPEN(UNIT=10,FILE=FIL1,STATUS='OLD',ERR=1000)
+           OPEN(UNIT=11,FILE=FIL2,STATUS='OLD',ERR=1001)
+           OPEN(UNIT=12,FILE=FIL3,STATUS='OLD',ERR=1002)
+
+
+
+           GOTO 1200
+ 1000      WRITE(*,*) ' DATA SET 1 DOES NOT EXIST '
+           GOTO 1005
+ 1001      WRITE(*,*) ' DATA SET 2 DOES NOT EXIST '
+           GOTO 1005
+ 1002      WRITE(*,*) ' DATA SET 3 DOES NOT EXIST '
+ 1005      CONTINUE
+           STOP
+ 1200      CONTINUE
+
+           OPEN(UNIT=20,FILE=OFIL)
+           OPEN(UNIT=21,FILE=PFIL)
+
+           READ(*,*) S1
+           WRITE(*,1300) S1
+ 1300      FORMAT(' INS DF WILL BE MULTIPLIED BY : ',F7.2)
+
+
+
+
+C READ DIFFERENCE STRUCTURE FACTORS (DF AND WEIGHT)  
+           I3=0
+ 1500      CONTINUE
+           READ(11,*,END=1600) IH,K,L,DF,WEIGHT,PHAS
+           FINS(IH,K,L,1)=DF*WEIGHT
+           IF (PHAS.GT.180.0) PHAS=PHAS-360.0
+           IF (PHAS.LE.-180.0) PHAS=PHAS+360.0
+           FINS(IH,K,L,3)=PHAS
+C           FINS(IH,K,L,1)=DF
+           I3=I3+1
+           GOTO 1500
+ 1600      CONTINUE
+
+C READ SIGMA OF STRUCTURE FACTORS (SIGMA)
+           I4=0
+ 1700      CONTINUE
+           READ(12,*,END=1800) IH,K,L,DF,SIGMA
+           FINS(IH,K,L,2)=SIGMA
+           I4=I4+1
+           GOTO 1700
+ 1800      CONTINUE
+
+
+
+
+C LOOP OVER DARK DATA SET TO PRESERVE ORDER
+C FINS(IH,K,L,1)  IS DELTA_F 
+C FINS(IH,K,L,2)  IS SIGMA 
+C USE FCALC
+          I1=0
+          I2=0
+          EPS=20.0
+          DDF=0.0
+          FFC=0.0
+ 3000    CONTINUE
+C           READ(10,*,END=3600) IH,K,L,FOBS,FCALC,PHIC
+           READ(10,*,END=3600) IH,K,L,FCALC,DUM,PHIC
+           IF (PHIC.GT.180.0) PHIC=PHIC-360.0
+           IF (PHIC.LE.-180.0) PHIC=PHIC+360.0
+           I2=I2+1
+C CHECK FOR F AND SIGMA > 0
+           IF (FINS(IH,K,L,1).LT.0.0.OR.FINS(IH,K,L,2).LT.0.0) GOTO 3000
+C CHECK WHETHER PHASE IS EQUAL DIRECTION FOR BOTH DATA SETS 
+C IF NOT SUBSTRACT DF
+           DPHAS=FINS(IH,K,L,3) 
+           IF ( (DPHAS.GT.PHIC-EPS.AND.DPHAS.LT.PHIC+EPS).OR.
+     *          (DPHAS+360.0.GT.PHIC-EPS.AND.DPHAS+360.0.LT.PHIC+EPS).OR.
+     *          (DPHAS.GT.PHIC+360.0-EPS.AND.DPHAS.LT.PHIC+360.0+EPS)) THEN
+             FOUT=S1*FINS(IH,K,L,1)+FCALC
+           ELSE
+             FOUT=-S1*FINS(IH,K,L,1)+FCALC 
+           ENDIF
+C STAY WITH CALCULATED PHASES 
+           IF (FOUT.LT.0.0) THEN
+            FOUT=ABS(FOUT)
+            PHIC=PHIC+180.0
+            IF (PHIC.GT.180.0) PHIC=PHIC-360.0
+           ENDIF 
+           SIGO=SQRT(S1)*FINS(IH,K,L,2)
+           DDF=DDF+ABS(S1*FINS(IH,K,L,1))
+           FFC=FFC+FCALC
+           WRITE(20,3500) IH,K,L,FOUT,SIGO,PHIC
+ 3500      FORMAT(3I4,3F10.3)
+           WRITE(21,3550) IH,K,L,FOUT,FCALC,PHIC
+ 3550      FORMAT(3I4,3F10.3)
+           I1=I1+1
+           GOTO 3000
+ 3600   CONTINUE
+           DDF=DDF/FFC*100
+
+           WRITE(*,3700) I1,I2,I3,I4,DDF
+ 3700   FORMAT(' AMPLITUDES/STRUCTURE FACTORS WRITTEN OUT  : ',I15,/,
+     *         ' DARK FCS READ IN                          : ',I15,/,
+     *         ' DIFFERENCE STRUCTURE FACTORS READ IN      : ',I15,/,
+     *         ' SIGMAS READ IN                            : ',I15,/,
+     *         ' TOTAL MAGNITUDE  OF DIFF-F/FCALC [%]      : ',F15.3) 
+          END
+
