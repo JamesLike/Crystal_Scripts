@@ -1,10 +1,7 @@
 #!/bin/bash
 # J Baxter 01/2020
 
-#space_group=" 39.60  74.50  78.90  90.00  90.00  90.00" # Serial
-#space_group=" 39.34  74.01  78.62  90  90  90" #FEL
 SYMM=" 19"
-resmax=1.75 #1.70
 echo 'Running trun_all_options'
 
 if [  "X$#" == "X4" ] ; then
@@ -20,11 +17,11 @@ else
 fi
 
 TMPHKL=tmp.hkl
-OUTFILE1=`echo $HKL_FILENAME | sed -e 's/\.hkl$/_old_truncate.mtz/'`
-OUTFILE2=`echo $HKL_FILENAME | sed -e 's/\.hkl$/_new_truncate.mtz/'`
-OUTFILE3=`echo $HKL_FILENAME | sed -e 's/\.hkl$/_phenix_massage.mtz/'`
-OUTFILE4=`echo $HKL_FILENAME | sed -e 's/\.hkl$/_phenix.mtz/'`
-BASENAME=`echo $HKL_FILENAME | sed -e 's/\.hkl$//'`
+OUTFILE1=$(echo $HKL_FILENAME | sed -e 's/\.hkl$/_old_truncate.mtz/')
+OUTFILE2=$(echo $HKL_FILENAME | sed -e 's/\.hkl$/_new_truncate.mtz/')
+OUTFILE3=$(echo $HKL_FILENAME | sed -e 's/\.hkl$/_phenix_massage.mtz/')
+OUTFILE4=$(echo $HKL_FILENAME | sed -e 's/\.hkl$/_phenix.mtz/')
+BASENAME=$(echo $HKL_FILENAME | sed -e 's/\.hkl$//')
 
 
 
@@ -44,25 +41,25 @@ CTYPE  H H H J     Q
 FORMAT '(3(F4.0,1X),F10.2,10X,F10.2)'
 EOF
 
-######################################
-## Old Truncate
-echo "Old Truncate.."
-######################################
-
-# Will calculates best estimante of F and I from the distribution of intensities in resolution shell. It tries to put them on an absolute scale busing the scale facotr in the wilson plot -- Ie negatives are NOT preserved.
-truncate HKLIN tmp.mtz HKLOUT $OUTFILE1 > ${BASENAME}_truncate.log << EOF # this is the old version of truncate
-truncate     YES
-anomalous     NO
-resolution  $res_high $res_low
-contents     H 1705     C 1128     N 304     O 328     S 10
-plot     OFF
-header BRIEF BATCH
-labin IMEAN=IMEAN SIGIMEAN=SIGIMEAN
-labout  F=F SIGF=SIGF IMEAN=I SIGIMEAN=SIGI
-falloff     yes     cone 30.0     PLTX
-NOHARVEST
-end
-EOF
+#######################################
+### Old Truncate
+#echo "Old Truncate.."
+#######################################
+#
+## Will calculates best estimante of F and I from the distribution of intensities in resolution shell. It tries to put them on an absolute scale busing the scale facotr in the wilson plot -- Ie negatives are NOT preserved.
+#truncate HKLIN tmp.mtz HKLOUT $OUTFILE1 > ${BASENAME}_truncate.log << EOF # this is the old version of truncate
+#truncate     YES
+#anomalous     NO
+#resolution  $res_high $res_low
+#contents     H 1705     C 1128     N 304     O 328     S 10
+#plot     OFF
+#header BRIEF BATCH
+#labin IMEAN=IMEAN SIGIMEAN=SIGIMEAN
+#labout  F=F SIGF=SIGF IMEAN=I SIGIMEAN=SIGI
+#falloff     yes     cone 30.0     PLTX
+#NOHARVEST
+#end
+#EOF
 
 ######################################
 ## New Truncate
