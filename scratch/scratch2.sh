@@ -7,6 +7,8 @@ yo
 #$var
 #task goes here
 #
+${loc}/something
+
 echo $loc
 echo "Does this work ? " $loc
 

@@ -4,9 +4,12 @@
 # sphere center for the double bond:
 set obs_map = ./neg_map.map
 # -1.49 5.38 -19.57
-set xc = -3.66 #-2.205 #-2.77 #-1.74
-set yc = 6.86 # 3.79 #6.59
-set zc =  -19.88 # -19.73 #-20.16
+#-2.205 #-2.77 #-1.74
+# 3.79 #6.59
+# -19.73 #-20.16
+set xc = -3.66
+set yc = 6.86
+set zc =  -19.88
 
 set radius = 5 #4 #8.0
 set sigma = 2  # 2 #2 #1.5

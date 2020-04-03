@@ -1,4 +1,5 @@
 #!/bin/bash
+loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 #LR23
 #dark_model="/mnt/data4/XFEL/LR23/DED_tests/dat/Dark.pdb"
@@ -20,7 +21,6 @@ dark_model="somethig"
 trunc_type="_phenix_massage.mtz"
 #trunc_type="_new_truncate.mtz"
 
-loc="/home/james/scripts/diff_maps" #script location, no need for trailing /
 res_high=1.75 #Highest resolution term eg 1.3
 res_low=50 #Lowest resolution term eg 15
 SYMM=19 # Symmetry group eg P212121 or 19
@@ -67,8 +67,12 @@ params () {
   echo "High Resolution cut:" $res_high
   echo "Low Resolution cut:" $res_low
   echo "Reflection Conversion:" $trunc_type
-
-
+  echo "Negative Intergration:"
+  grep -m1 xc ${loc}/progs/neg.sh | awk '{print $2,$3,$4}'
+  grep -m1 yc ${loc}/progs/neg.sh | awk '{print $2,$3,$4}'
+  grep -m1 zc ${loc}/progs/neg.sh | awk '{print $2,$3,$4}'
+  grep -m1 radius ${loc}/progs/neg.sh | awk '{print $2,$3,$4}'
+  grep -m1 sigma ${loc}/progs/neg.sh | awk '{print $2,$3,$4}'
 }
 ######################################
 #Go to the PDB file and look up the cell
@@ -122,9 +126,9 @@ do
   ######################################
   phenix.python ${loc}/N_ext_fit_conv.py neg_count_Mari.dat
   mv N_ext_Fitted_C.png count_MS.png
-  phenix.python ${loc}/N_ext_fit_conv_2.py neg_unw_count.dat
+  phenix.python ${loc}/N_ext_fit_conv_2.py neg_unw_count_Phenix.dat
   mv N_ext_Fitted_C.png count_unw.png
-  phenix.python ${loc}/N_ext_fit_conv_2.py neg_count.dat
+  phenix.python ${loc}/N_ext_fit_conv_2.py neg_count_Phenix.dat
   mv N_ext_Fitted_C.png count_JB.png
 #  a=$(phenix.python ${loc}/N_ext_fit_conv_2.py neg_unw_count.dat | awk '{print int($3)}')
 #  b=$(($a*10+1))
@@ -140,9 +144,10 @@ do
   ######################################
   # Clean up
   ######################################
-
+  params > params.dat
   rm -f all_sc1.mtz all_sc2_free.mtz all_sc2.mtz dark_phase.hkl dark_scaled.hkl FC_dark.mtz Light_dark.phs Light_dwt.mtz light_scaled.hkl Light_wd.map model_phs.hkl scale_it.mtz wmar.inp
   #rm all_Fs.hkl all.mtz Fext_map.dat Fext_map.hkl fmodel fobs_dark fobs_light Fxt_map_9.map James_ext.mtz LFs_tmp1  light_Fs light_Fs_scaled light_Fs_scaled.hkl light.hkl neg_9.log  neg.inp neg_int.dat phenix_Fobs_Fobs.mtz tmp_dark_1 tmp_dark_12a tmp_dark_1a tmp_dark_2 tmp_dark_2a tmp_dark_phase_1  tmp_dark_phase_12a tmp_dark_phase_1a  tmp_dark_phase_2 tmp_dark_phase_2a tmp_light_1  tmp_light_12a tmp_light_1a tmp_light_2 tmp_light_2a weighted_map_log
   #rm dark_Fs dark_Fs_scaled dark_Fs_scaled.hkl dark.hkl  dark_phases dark_phases.hkl dark_phases_sorted.hkl dFC_DFs_LFs_tmp1 dFC_DFs_LFs_tmp2 dFC_DFs_tmp1  dFC_tmp1 DFs_tmp1 diff_unweighted_map.dat diff_unweighted_map.hkl diff_unweighted_map.map diff_unweighted_map.mtz diff_weight_map.dat diff_weight_map.hkl diff_weight_map.mtz map_mol.ccp4 py_tmp.pml neg_*.log
+
 done
 

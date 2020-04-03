@@ -44,7 +44,7 @@ rm -f neg_int.dat COUNT.dat
 
 if [ "$Extrap" == "yes" ] ; then 
 	COUNTER=1
-	while [ $COUNTER -le 2 ] ; do
+	while [ $COUNTER -le 300 ] ; do
 		COUNT=$(echo "scale=2; $COUNTER/10" | bc -l)
 		echo "Processing $COUNT"
 		python ${loc}/scripts/own_scales/extended_map.py $COUNTER
@@ -69,10 +69,9 @@ end_weight
 		LABI F1=Fext SIG1=sigFext PHI=PHI
 END-wfft
 	
-		#${script_loc}/neg.sh > neg_${COUNTER}.log 
-		#grep 'SUM NEGATIVE DENSITY :' neg_${COUNTER}.log | awk '{print $5}' >> neg_int.dat
-		#echo $COUNT >> COUNT.dat
-		
+		${loc}/neg.sh > neg_${COUNTER}.log
+		grep 'SUM NEGATIVE DENSITY :' neg_${COUNTER}.log | awk '{print $5}' >> neg_int.dat
+		echo $COUNT >> COUNT.dat
 		mv neg_map.map Fxt_map_${COUNTER}.map
 		###################################
 		#Now maqke the unweighted map
@@ -86,7 +85,7 @@ END-wfft
 end_weight
 			
 		fft HKLIN James_unw_ext.mtz MAPOUT neg_map.map  >log << END-wfft 
-		RESO 15 $res_high
+		RESO $res_low $res_high
 		SCALE F1 1.0 0.0
 		#GRID 160 160 140
 		BINMAPOUT
@@ -103,11 +102,13 @@ END-wfft
 		COUNTER=$(( $COUNTER + 10))
 	done
 
-	paste COUNT.dat neg_unw_int.dat > neg_unw_count.dat
-	paste COUNT.dat neg_int.dat  > neg_count.dat
-	gnuplot -e "set terminal png size 800,600; set output 'count.png'; set xlabel 'N_{EXT}'; set ylabel 'Integrated negative electron density (arb.)'; set key off ; plot 'neg_count.dat' using 1:(\$2*-1) with linespoints"
+	paste COUNT.dat neg_unw_int.dat > neg_unw_count_Phenix.dat
+	paste COUNT.dat neg_int.dat  > neg_count_Phenix.dat
+	#gnuplot -e "set terminal png size 800,600; set output 'count.png'; set xlabel 'N_{EXT}'; set ylabel 'Integrated negative electron density (arb.)'; set key off ; plot 'neg_count.dat' using 1:(\$2*-1) with linespoints"
 	echo "Run GNUPLOT code to view output:"
 	echo "plot \"neg_count.dat\" u 1:(\$2*-1) "
+	###################################
+	## If no Extrap map..
 	###################################
 	else
 	echo "Not running Extrapolated maps"
