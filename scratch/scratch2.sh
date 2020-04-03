@@ -11,4 +11,6 @@ ${loc}/something
 
 echo $loc
 echo "Does this work ? " $loc
+hello myself
+and another differnce
 
