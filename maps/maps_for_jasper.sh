@@ -1,4 +1,5 @@
 #!/bin/bash
+#J Baxter 2020
 #LR23
 #dark_model="/mnt/data4/XFEL/LR23/DED_tests/dat/Dark.pdb"
 
@@ -57,6 +58,18 @@ makefigs () {
 	pymolfig $1_phenix_multiscale_1.ccp4
 }
 
+params () {
+  echo "File: " $name
+  echo "Dark Obs: " $dark_obs
+  echo "Dark Model: " $dark_model
+  echo "Space Group:" $SYMM
+  echo "Unit Cell: " $cell
+  echo "High Resolution cut:" $res_high
+  echo "Low Resolution cut:" $res_low
+  echo "Reflection Conversion:" $trunc_type
+
+
+}
 ######################################
 #Go to the PDB file and look up the cell
 ######################################

@@ -1,9 +1,9 @@
 #!/bin/bash
+# J Baxter 2020
 # Script will generate 4 maps using different scaling methods:
 # 1. Using Marius's merthod: Qwiefghted difference maps scaled using anisotropic b factors then 'refine' scaling, followed then by kraut scaling before making maps.
 # 2. Using phenix and its multiscaling methods which is based on the scaling implemented in CNS - having read some of the CNS documenttion it seems this is a form of wilson scaling in resolution bins
 # 3. Using the phenix multiscale method followed by marius's qeighting scaripts
-# 4. Using XSCALE from xds to scale the data sets then the qweighted scripts to generate the maps. 
 
 #Inputs
 loc="/home/james/scripts/diff_maps"

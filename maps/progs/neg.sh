@@ -1,4 +1,5 @@
 #!/bin/tcsh
+#J Baxter 2020
 #set obs_map = /home/jb2717/progs/marius/james/dat/test/occupancy_edits/maps/map_4.map
 # sphere center for the double bond:
 set obs_map = ./neg_map.map
