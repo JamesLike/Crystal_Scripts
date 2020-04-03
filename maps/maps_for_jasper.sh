@@ -1,5 +1,5 @@
 #!/bin/bash
-loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
+loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 #LR23
 #dark_model="/mnt/data4/XFEL/LR23/DED_tests/dat/Dark.pdb"
@@ -16,8 +16,13 @@ loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
 #dark_FC="/mnt/data4/serial/2019_05_p14/processing/q_weighted/q_weighted_EXT_New_FC_2/dark_single.mtz" 
 #dark_obs="/mnt/data4/serial/2019_05_p14/processing/q_weighted/00_phenix_massage_RES_CUT.mtz" 
 
-dark_obs="/mnt/data4/XFEL/LR23/DED_tests/testing/AllRuns-mosflm_total_dark.hkl"
-dark_model="/mnt/data4/XFEL/LR23/DED_tests/dat/Dark.pdb"
+#dark_obs="/mnt/data4/XFEL/LR23/DED_tests/testing/AllRuns-mosflm_total_dark.hkl"
+#dark_model="/mnt/data4/XFEL/LR23/DED_tests/dat/Dark.pdb"
+
+dark_obs="/home/james/Desktop/tmptmptmp/AllRuns-mosflm_total_dark.hkl"
+dark_model="/home/james/Desktop/tmptmptmp/Dark.pdb"
+
+
 #trunc_type="_phenix_massage.mtz"
 trunc_type="_new_truncate.mtz"
 
@@ -43,7 +48,7 @@ pymolfig () {
 	echo load ${dark_model} > py_tmp.pml
 	cp $1 map_mol.ccp4
 	echo load map_mol.ccp4 >> py_tmp.pml
-	cat ${loc}/view_map.pml >> py_tmp.pml
+	cat ${loc}/view_map_XFEL.pml >> py_tmp.pml
 	pymol -c ./py_tmp.pml
 	png_name=$(echo $1 | sed -e 's/\.map$//')
 	mv png.png ${png_name}.png
@@ -85,7 +90,7 @@ if [ -z "$cell" ]; then echo "Your cell is empty !" && exit 1 ; fi
 ######################################
 ${loc}/generate_FC.sh $dark_model $SYMM
 dark_FC=$(echo $dark_model | sed -e 's/\.pdb$/_SFALL.mtz/')
-
+FILES=*.hkl
 ######################################
 # Generate Fo from the dark Is
 # Then do some organisation
@@ -101,8 +106,6 @@ echo $dark_OBS
 # Start the processing loop for all
 # hkl files in the dir
 ######################################
-FILES=*.hkl
-cp $dark_obs .
 for f in $FILES
 do
   cd $work_dir || exit

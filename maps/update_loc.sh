@@ -9,12 +9,13 @@ replace () {
   sed -i -e "2iloc=\"$DIR\"" $1
 }
 
-replace maps_for_jasper.sh
-replace Extrap_maps_marius.sh
-replace own_scales/make_phenix_q_weight.sh
-replace map_generate.sh
-replace make_dmap4_James_edited.sh
-replace phenix_gen_scaled_fs.sh
+replace ${DIR}/maps_for_jasper.sh
+replace ${DIR}/Extrap_maps_marius.sh
+replace ${DIR}/own_scales/make_phenix_q_weight.sh
+replace ${DIR}/map_generate.sh
+replace ${DIR}/make_dmap4_James_edited.sh
+replace ${DIR}/phenix_gen_scaled_fs.sh
+replace ${DIR}/progs/neg.sh
 
 
 echo "Done"

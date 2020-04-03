@@ -1,19 +1,20 @@
-#!/bin/tcsh
+#!/bin/bash
+loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 #set obs_map = /home/jb2717/progs/marius/james/dat/test/occupancy_edits/maps/map_4.map
 # sphere center for the double bond:
-set obs_map = ./neg_map.map
+obs_map="./neg_map.map"
 # -1.49 5.38 -19.57
 #-2.205 #-2.77 #-1.74
 # 3.79 #6.59
 # -19.73 #-20.16
-set xc = -3.66
-set yc = 6.86
-set zc =  -19.88
+xc=-3.66
+yc=6.86
+zc=-19.88
 
-set radius = 5 #4 #8.0
-set sigma = 2  # 2 #2 #1.5
-set out_map = mask_1.map
+radius=5 #4 #8.0
+sigma=2  # 2 #2 #1.5
+out_map=mask_1.map
 
 echo $obs_map > neg.inp
 echo $out_map >> neg.inp
@@ -26,4 +27,4 @@ echo $xc $yc $zc >> neg.inp # Centre of sphere
 echo $radius >> neg.inp
 echo $sigma >> neg.inp
 
-./NegExCCP4_v2 < neg.inp
+${loc}/progs/NegExCCP4_v2 < neg.inp
