@@ -44,20 +44,20 @@ end_weight
   BINMAPOUT
   LABI F1=Fext SIG1=sigF PHI=PHI
 END-wfft
-###########################################
-	~/scripts/marius/neg_int/neg.sh > neg_${add}_Mari.log
+	${loc}/progs/neg.sh > neg_${add}_Mari.log
 	grep 'SUM NEGATIVE DENSITY :' neg_${add}_Mari.log | awk '{print $5}' >> neg_add.dat
 	echo $add >> add.dat
-
   mv marius_ext.mtz Fext_${added}.mtz
   mv neg_map.map Fext_map_${added}_Mari.map
   added=$(( $added + 5))
 done
 
+######################################
+# Combine all the data together & plot
+######################################
 paste add.dat neg_add.dat > neg_count_Mari.dat
 paste add.dat neg_add_1.dat > neg_count_Mari_1.dat
 paste add.dat neg_add_2.dat > neg_count_Mari_2.dat
 paste add.dat neg_add_3.dat > neg_count_Mari_3.dat
-
 gnuplot -e "set terminal png size 800,600; set output 'count_Mari.png'; set xlabel 'N_{EXT}'; set ylabel 'Integrated negative electron density (arb.)'; set key off ; plot 'neg_count_Mari.dat' using 1:(\$2*-1) with linespoints"
 #rm Fext_map*

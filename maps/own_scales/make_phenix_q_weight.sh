@@ -61,8 +61,8 @@ if [ "$Extrap" == "yes" ] ; then
 		END
 end_weight
 	
-		fft HKLIN James_ext.mtz MAPOUT neg_map.map  >log << END-wfft 
-		RESO 15 $res_high
+		fft HKLIN James_ext.mtz MAPOUT neg_map.map  >log << END-wfft
+		RESO $res_low $res_high
 		SCALE F1 1.0 0.0
 		GRID 160 160 140
 		BINMAPOUT
@@ -92,9 +92,11 @@ end_weight
 		BINMAPOUT
 		LABI F1=Fext SIG1=sigFext PHI=PHI
 END-wfft
-	##################################################################
-		~/scripts/marius/neg_int/neg.sh > neg_unw_${COUNTER}.log
-		################################################
+
+    ###################################
+		#Integrate the density and save it
+		###################################
+    ${loc}/progs/neg.sh > neg_unw_${COUNTER}.log
 		grep 'SUM NEGATIVE DENSITY :' neg_unw_${COUNTER}.log | awk '{print $5}' >> neg_unw_int.dat
 		mv neg_map.map Fxt_unw_map_${COUNTER}.map
 		mv James_unw_ext.mtz Fxt_unw_${COUNTER}.mtz

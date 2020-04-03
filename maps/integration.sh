@@ -54,7 +54,6 @@ done
 	rm *.log
 	rm -f tmp_n tmp_m
 	cd ..
-
 done
 
 gnuplot -e "set terminal png size 800,600; set output 'result.png'; set key off ; plot 'result.dat' using 1:(200/\$2) with linespoints, 'real_res.dat' using 1:(200/\$2) with linespoints, 'real_res.dat' using 1:(100-(200/\$2)) with linespoints"
