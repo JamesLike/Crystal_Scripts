@@ -95,7 +95,9 @@ FILES=*.hkl
 # Generate Fo from the dark Is
 # Then do some organisation
 ######################################
+cp $dark_obs .
 ${loc}/trunc_all_options.sh ${dark_obs##*/} $res_high $res_low "$cell"
+rm ${dark_obs##*/}
 cp $dark_model .
 cp $dark_FC .
 work_dir=$(echo | pwd)
