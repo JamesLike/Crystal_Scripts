@@ -1,4 +1,5 @@
 #!/bin/bash
+loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
 # J Baxter 2020
 # Script will generate 4 maps using different scaling methods:
 # 1. Using Marius's merthod: Qwiefghted difference maps scaled using anisotropic b factors then 'refine' scaling, followed then by kraut scaling before making maps.
@@ -6,7 +7,6 @@
 # 3. Using the phenix multiscale method followed by marius's qeighting scaripts
 
 #Inputs
-loc="/home/james/scripts/diff_maps"
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 
 if [  "X$#" == "X8" ] ; then

@@ -1,5 +1,5 @@
 #!/bin/bash
-loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
+loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 #LR23
 #dark_model="/mnt/data4/XFEL/LR23/DED_tests/dat/Dark.pdb"
@@ -16,13 +16,13 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #dark_FC="/mnt/data4/serial/2019_05_p14/processing/q_weighted/q_weighted_EXT_New_FC_2/dark_single.mtz" 
 #dark_obs="/mnt/data4/serial/2019_05_p14/processing/q_weighted/00_phenix_massage_RES_CUT.mtz" 
 
-dark_obs="something"
-dark_model="somethig"
-trunc_type="_phenix_massage.mtz"
-#trunc_type="_new_truncate.mtz"
+dark_obs="/mnt/data4/XFEL/LR23/DED_tests/testing/AllRuns-mosflm_total_dark.hkl"
+dark_model="/mnt/data4/XFEL/LR23/DED_tests/dat/Dark.pdb"
+#trunc_type="_phenix_massage.mtz"
+trunc_type="_new_truncate.mtz"
 
-res_high=1.75 #Highest resolution term eg 1.3
-res_low=50 #Lowest resolution term eg 15
+res_high=1.5 #Highest resolution term eg 1.3
+res_low=30 #Lowest resolution term eg 15
 SYMM=19 # Symmetry group eg P212121 or 19
 
 if [ ! -f $dark_model ]; then echo "$dark_model not found!" && exit 1 ; fi
@@ -90,17 +90,19 @@ dark_FC=$(echo $dark_model | sed -e 's/\.pdb$/_SFALL.mtz/')
 # Generate Fo from the dark Is
 # Then do some organisation
 ######################################
-${loc}/scripts/trunc_all_options.sh $dark_obs $res_high $res_low "$cell"
+${loc}/trunc_all_options.sh ${dark_obs##*/} $res_high $res_low "$cell"
 cp $dark_model .
-cp $dark_obs .
 cp $dark_FC .
 work_dir=$(echo | pwd)
-
+dark_basename=$(echo | basename $dark_obs .hkl)
+dark_OBS="../"${dark_basename}${trunc_type}
+echo $dark_OBS
 ######################################
 # Start the processing loop for all
 # hkl files in the dir
 ######################################
 FILES=*.hkl
+cp $dark_obs .
 for f in $FILES
 do
   cd $work_dir || exit
@@ -116,10 +118,10 @@ do
   ## Make the phenix maps and extrapolated
   ## Make the scalit extrap maps
   ######################################
-  ${loc}/trunc_all_options.sh $f $res_high $res_low "$cell"
-  ${loc}/map_generate.sh $dark_model $dark_FC $dark_obs ./${name}${trunc_type} $name $res_high $res_low "$cell" >> map.log
-  ${loc}/own_scales/make_phenix_q_weight.sh $dark_model $dark_FC $dark_obs ./${name}${trunc_type} "$cell"
-  ${loc}/Extrap_maps_marius.sh "$cell"
+  ${loc}/trunc_all_options.sh $f $res_high $res_low "$cell" || exit
+  ${loc}/map_generate.sh $dark_model $dark_FC $dark_OBS ./${name}${trunc_type} $name $res_high $res_low "$cell" >> map.log || exit
+  ${loc}/own_scales/make_phenix_q_weight.sh $dark_model $dark_FC $dark_OBS ./${name}${trunc_type} "$cell" $res_high $res_low|| exit
+  ${loc}/Extrap_maps_marius.sh "$cell" $res_high $res_low || exit
 
   ######################################
   ## Fit the extraolated maps

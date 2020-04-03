@@ -1,11 +1,11 @@
 #!/bin/bash
+loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
-loc=""
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 SYMM=" 19"
 bin_nam="Light"
 
-if [  "X$#" == "X7" ] ; then
+if [  "X$#" == "X3" ] ; then
 	cell=$1
 	res_high=$2
 	res_low=$3
@@ -56,5 +56,5 @@ done
 # Combine all the data together & plot
 ######################################
 paste add.dat neg_add.dat > neg_count_Mari.dat
-gnuplot -e "set terminal png size 800,600; set output 'count_Mari.png'; set xlabel 'N_{EXT}'; set ylabel 'Integrated negative electron density (arb.)'; set key off ; plot 'neg_count_Mari.dat' using 1:(\$2*-1) with linespoints"
+#gnuplot -e "set terminal png size 800,600; set output 'count_Mari.png'; set xlabel 'N_{EXT}'; set ylabel 'Integrated negative electron density (arb.)'; set key off ; plot 'neg_count_Mari.dat' using 1:(\$2*-1) with linespoints"
 #rm Fext_map*

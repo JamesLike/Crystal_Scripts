@@ -69,12 +69,12 @@ echo "NewTruncate.."
 #Truncate will use french and wilson based algorithum for scaling the b factors also does anisotrpoic scaling.
 ctruncate -mtzin tmp.mtz -mtzout $OUTFILE2 -colin '/*/*/[IMEAN,SIGIMEAN]' -nres 238 > ${BASENAME}_ctruncate.log
 
-######################################
-## Phneix with its massage conversion
-echo "Phenix massage.."
-######################################
-phenix.reflection_file_converter tmp.mtz --mtz=$OUTFILE3 --non_anomalous --write_mtz_amplitudes --mtz_root_label=F  --massage_intensities --resolution=$res_high > ${BASENAME}_phenix_massage.log
-phenix.xtriage file $OUTFILE3 > ${BASENAME}_phenix_massage.log
+#######################################
+### Phneix with its massage conversion
+#echo "Phenix massage.."
+#######################################
+#phenix.reflection_file_converter tmp.mtz --mtz=$OUTFILE3 --non_anomalous --write_mtz_amplitudes --mtz_root_label=F  --massage_intensities --resolution=$res_high > ${BASENAME}_phenix_massage.log
+#phenix.xtriage file $OUTFILE3 > ${BASENAME}_phenix_massage.log
 
 # Phneix using what should be french wilson 
 #phenix.reflection_file_converter tmp.mtz --mtz=$OUTFILE4 --non_anomalous --write_mtz_amplitudes --mtz_root_label=F  > ${BASENAME}_phenix.log

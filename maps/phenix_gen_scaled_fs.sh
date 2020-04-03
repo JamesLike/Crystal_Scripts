@@ -1,4 +1,5 @@
 #!/bin/bash
+loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
 # J Baxter 01/2020
 # This script will get phenix to output the multiscaled F1 and F2, then will write these into files with the Fobs, claulate the scaling factor for each and then calculate the scaled sig fobs
 #It will call a custom edited cctx scripts using an install of cctbx's python enviroment edits below:
@@ -17,7 +18,6 @@
 #      for ai in f_model: f.write(str(ai[0][0])+'\t'+str(ai[0][1])+'\t'+str(ai[0][2])+'\t'+str(180*cmath.phase(ai[1])/math.pi)+'\n')
 #      f.close()
 
-loc="/home/james/scripts/diff_maps"
 
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 

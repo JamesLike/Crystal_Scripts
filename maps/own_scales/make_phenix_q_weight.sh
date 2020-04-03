@@ -1,8 +1,8 @@
 #!/bin/bash
+loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 # Script to combine dark Fs, lightFs and Fcalcs and then generated Fext and qweighted maps
 
-loc="/home/james/scripts/diff_maps"
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 
 SYMM=" 19"
