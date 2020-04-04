@@ -38,9 +38,9 @@ if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 #Quick Functions for later
 ######################################
 move () {
-  mv diff_weight_map.map $1_James_QW.map
-	mv Light_nonw.map $1_nonw.map
-	mv Light_wdex.map $1_wdex.map
+  mv diff_weight_map.map "$1"_James_QW.map
+	mv Light_nonw.map "$1"_nonw.map
+	mv Light_wdex.map "$1"_wdex.map
 }
 
 pymolfig () {
@@ -143,10 +143,10 @@ do
   ## Move some stuff
   ## Make pymol figures
   ######################################
-  move ${name}
-  makefigs ${name}_wdex.map
-  makefigs_${name}_phenix_multiscale_1.ccp4
-  makefigs ${name}_James_QW.map
+  move "${name}"
+  makefigs "${name}"
+  #makefigs "${name}_phenix_multiscale_1.ccp4"
+  #makefigs "${name}_James_QW.map"
 
   ######################################
   # Clean up

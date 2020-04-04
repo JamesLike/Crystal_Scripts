@@ -6,7 +6,7 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 
 SYMM=" 19"
-Extrap="NO" #if = yes will make extrapmaps
+Extrap="yes" #if = yes will make extrapmaps
 
 if [  "X$#" == "X7" ] ; then
 	dark_model=$1
@@ -47,7 +47,7 @@ if [ "$Extrap" == "yes" ] ; then
 	while [ $COUNTER -le 300 ] ; do
 		COUNT=$(echo "scale=2; $COUNTER/10" | bc -l)
 		echo "Processing $COUNT"
-		python ${loc}/scripts/own_scales/extended_map.py $COUNTER
+		python ${loc}/own_scales/extended_map.py $COUNTER
 		awk '{printf "%5i%5i%5i%12.3f%12.3f%12.3f \n",$1, $2, $3, $4, $5, $6}' Fext_map.dat > Fext_map.hkl #hkl phFC Fext, sigFext
 		awk '{printf "%5i%5i%5i%12.3f%12.3f%12.3f \n",$1, $2, $3, $4, $5, $6}' Fext_unw_map.dat > Fext_unw_map.hkl #hkl phFC Fext, sigFext
 		################
@@ -69,7 +69,7 @@ end_weight
 		LABI F1=Fext SIG1=sigFext PHI=PHI
 END-wfft
 	
-		${loc}/neg.sh > neg_${COUNTER}.log
+		${loc}/progs/neg.sh > neg_${COUNTER}.log
 		grep 'SUM NEGATIVE DENSITY :' neg_${COUNTER}.log | awk '{print $5}' >> neg_int.dat
 		echo $COUNT >> COUNT.dat
 		mv neg_map.map Fxt_map_${COUNTER}.map
