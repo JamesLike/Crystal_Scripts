@@ -74,7 +74,7 @@ params () {
   echo "Reflection Conversion:" $trunc_type
   echo "Negative Intergration:"
   grep -m1 xc ${loc}/progs/neg.sh
-  grep -m1 yc ${loc}/progs/neg.sh
+  grep -m1 yc= ${loc}/progs/neg.sh
   grep -m1 zc ${loc}/progs/neg.sh
   grep -m1 radius ${loc}/progs/neg.sh
   grep -m1 sigma ${loc}/progs/neg.sh
