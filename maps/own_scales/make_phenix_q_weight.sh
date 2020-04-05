@@ -13,7 +13,7 @@ if [  "X$#" == "X7" ] ; then
 	dark_model_FC=$2
 	dark_obs=$3
 	light_obs=$4
-	space_group=$5
+	cell=$5
 	res_high=$6
 	res_low=$7
 else
@@ -54,7 +54,7 @@ if [ "$Extrap" == "yes" ] ; then
 		# Turn the extended hkls into mtz then into a map (named neg_map.map) which is fed to the negative integration script (M Scmidt)
 		################
 		f2mtz HKLIN Fext_map.hkl HKLOUT James_ext.mtz >log << end_weight 
-		CELL ${space_group}
+		CELL ${cell}
 		SYMM ${SYMM}
 		LABOUT H   K  L   PHI  Fext  sigFext
 		CTYPE  H   H  H   P      F   Q
@@ -77,7 +77,7 @@ END-wfft
 		#Now maqke the unweighted map
 		###################################
 		f2mtz HKLIN Fext_unw_map.hkl HKLOUT James_unw_ext.mtz >log << end_weight 
-		CELL ${space_group}
+		CELL ${cell}
 		SYMM ${SYMM}
 		LABOUT H   K  L   PHI  Fext  sigFext
 		CTYPE  H   H  H   P      F   Q
@@ -126,7 +126,7 @@ awk '{printf "%5i%5i%5i%12.3f%12.3f%12.3f \n",$1, $2, $3, $4, $5, $6}' diff_weig
 echo "Making unwt map"
 ###################################
 f2mtz HKLIN diff_unweighted_map.hkl HKLOUT diff_unweighted_map.mtz << end_weight  >log
-	CELL ${space_group}
+	CELL ${cell}
 	SYMM ${SYMM}
 	LABOUT H   K  L   PHDOBS  DOBS  FOM
 	CTYPE  H   H  H   P      F   W
@@ -145,7 +145,7 @@ END-wfft
 echo "Making wt map"
 ###################################
 f2mtz HKLIN diff_weight_map.hkl HKLOUT diff_weight_map.mtz << end_weight  >weighted_map_log
-	CELL ${space_group}
+	CELL ${cell}
 	SYMM ${SYMM}
 	LABOUT H   K  L   PHDOBS  DOBS  FOM
 	CTYPE  H   H  H   P      F   W

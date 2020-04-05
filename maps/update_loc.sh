@@ -10,12 +10,15 @@ replace () {
 }
 
 replace ${DIR}/maps_for_jasper.sh
-replace ${DIR}/Extrap_maps_marius.sh
+replace ${DIR}/extrap_maps_marius.sh
 replace ${DIR}/own_scales/make_phenix_q_weight.sh
+replace ${DIR}/own_scales/make_single_multisale.sh
 replace ${DIR}/map_generate.sh
 replace ${DIR}/make_dmap4_James_edited.sh
 replace ${DIR}/phenix_gen_scaled_fs.sh
 replace ${DIR}/progs/neg.sh
+replace ${DIR}/extrap_maps_marius.sh
+
 
 
 echo "Done"

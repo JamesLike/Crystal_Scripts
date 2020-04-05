@@ -10,7 +10,7 @@ if [  "X$#" == "X3" ] ; then
 	res_high=$2
 	res_low=$3
 else
-	echo "Usage: Extrap_maps <cell> <res_high> <res_low> (should be used after map_dmap... has been run)"
+	echo "Usage: extrap_maps <cell> <res_high> <res_low> (should be used after map_dmap... has been run)"
 	exit 1
 fi
 
@@ -23,7 +23,7 @@ do
 	echo "Processing " $add
 	echo dark_phase.hkl >  add.inp # Dark phases on an absolute scale hkl F sig F phase
 	echo ${bin_nam}_dark.phs >> add.inp # Q weighted time-point map: hkl deltF FOM PHI
-	echo light_scaled.hkl >> add.inp #  Light scaled structure factors hkl F sigF 
+	echo light_scaled.hkl >> add.inp #  Light scaled structure factors hkl F sigF
 	echo darkFC_extrap.hkl >> add.inp
 	echo darkFC_extrap.phs >> add.inp
 	echo ${add} >> add.inp
@@ -47,8 +47,8 @@ END-wfft
 	${loc}/progs/neg.sh > neg_${add}_Mari.log
 	grep 'SUM NEGATIVE DENSITY :' neg_${add}_Mari.log | awk '{print $5}' >> neg_add.dat
 	echo $add >> add.dat
-  mv marius_ext.mtz Fext_${added}.mtz
-  mv neg_map.map Fext_map_${added}_Mari.map
+  mv marius_ext.mtz Fext_QW_SCALIT_${added}.mtz
+  mv neg_map.map Fext_QW_SCALEIT_${added}.map
   added=$(( $added + 5))
 done
 
