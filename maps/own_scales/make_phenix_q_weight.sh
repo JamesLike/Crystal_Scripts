@@ -72,7 +72,7 @@ END-wfft
 		${loc}/progs/neg.sh > neg_${COUNTER}.log
 		grep 'SUM NEGATIVE DENSITY :' neg_${COUNTER}.log | awk '{print $5}' >> neg_int.dat
 		echo $COUNT >> COUNT.dat
-		mv neg_map.map Fxt_map_${COUNTER}.map
+		mv neg_map.map Fext_QW_Phenix_Multiscale_${COUNTER}.map
 		###################################
 		#Now maqke the unweighted map
 		###################################
@@ -97,8 +97,8 @@ END-wfft
 		###################################
     ${loc}/progs/neg.sh > neg_unw_${COUNTER}.log
 		grep 'SUM NEGATIVE DENSITY :' neg_unw_${COUNTER}.log | awk '{print $5}' >> neg_unw_int.dat
-		mv neg_map.map Fxt_unw_map_${COUNTER}.map
-		mv James_unw_ext.mtz Fxt_unw_${COUNTER}.mtz
+		mv neg_map.map Fext_unw_Phenix_Multiscale_${COUNTER}.map
+		mv James_unw_ext.mtz Fext_unw_Phenix_Multiscale_${COUNTER}.mtz
 		COUNTER=$(( $COUNTER + 10))
 	done
 

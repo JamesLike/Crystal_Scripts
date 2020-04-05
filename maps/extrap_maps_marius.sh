@@ -47,7 +47,7 @@ END-wfft
 	${loc}/progs/neg.sh > neg_${add}_Mari.log
 	grep 'SUM NEGATIVE DENSITY :' neg_${add}_Mari.log | awk '{print $5}' >> neg_add.dat
 	echo $add >> add.dat
-  mv marius_ext.mtz Fext_QW_SCALIT_${added}.mtz
+  mv marius_ext.mtz Fext_QW_SCALEIT_${added}.mtz
   mv neg_map.map Fext_QW_SCALEIT_${added}.map
   added=$(( $added + 5))
 done
