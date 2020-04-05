@@ -1,5 +1,5 @@
 #!/bin/bash
-loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
+loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 SYMM=" 19"
