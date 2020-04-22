@@ -1,5 +1,5 @@
 #!/bin/bash
-loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
+loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
 # J Baxter 2020 heavily based on MS in Nat. Methods
 # shell script to scale time-resolved and reference data
 # and calculate difference maps. 

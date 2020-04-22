@@ -1,5 +1,5 @@
 #!/bin/bash
-loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
+loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
 # J Baxter 2020
 # Script will generate 4 maps using different scaling methods:
 # 1. Using Marius's merthod: Qwiefghted difference maps scaled using anisotropic b factors then 'refine' scaling, followed then by kraut scaling before making maps.
