@@ -23,7 +23,7 @@ TEMP_SNR=$(   mktemp -p /tmp mergestats_SNR.XXXXXXXXXX)
 NUM_TOTAL_MEAS=$(grep " measurements in total.$" $FILENAME_LOG | sed -e 's| measurements in total.||g' )
 NUM_TOTAL_REFL=$(grep " reflections in total.$"  $FILENAME_LOG | sed -e 's| reflections in total.||g' )
 OVERALL_REDUNDANCY=$(printf "%.1f" $(echo $NUM_TOTAL_MEAS/$NUM_TOTAL_REFL | bc -l) )
-Number_images=$(/dls/i24/data/2020/mx19458-39/processing/crystFEL/store/indexed_filenames  *.stream | wc -l)
+Number_images=$(/dls/i24/data/2020/mx19458-39/processing/crystFEL/store/indexed_filenames  ../streams/*.stream | wc -l)
 
 SUM_MEASURED=$(cut -b 11-20 $FILENAME_SNR | tail -n +2| tr '\n' '+' | sed -e 's|+$| \n|g' | bc -l )
 SUM_POSSIBLE=$(cut -b 20-29 $FILENAME_SNR | tail -n +2| tr '\n' '+' | sed -e 's|+$| \n|g' | bc -l )
@@ -46,7 +46,7 @@ sigtonoise=$(grep "^Overall <snr> " $FILENAME_LOG | awk '{printf "%0.3f", $4}')
 
 rsplit=$(grep "^Overall Rsplit* " $FILENAME_LOG | awk '{printf "%0.2f", $4}')
 
-ccstar=$(grep "^Overall CC* " $FILENAME_LOG | awk '{printf "%0.2f", $4}')
+ccstar=$(grep "^Overall CC\* " $FILENAME_LOG | awk '{printf "%0.2f", $4}')
 
 cc=$(grep "^Overall CC " $FILENAME_LOG | awk '{printf "%0.2f", $4}')
 
@@ -74,7 +74,7 @@ grep "B =" wilson.dat >> $FILENAME_OUT
 echo >>$FILENAME_OUT
 paste -d " " $TEMP_RES $TEMP_SNR $TEMP_RSPLIT $TEMP_CC $TEMP_CCstar                               >>$FILENAME_OUT
 
-TABLE1="Tabl.dat"
+TABLE1="Table1.dat"
 hmeasured=$(tail $FILENAME_OUT -n 1 | awk '{printf "%0.0f", $3}')
 hcomple=$(tail $FILENAME_OUT -n 1 | awk '{printf "%0.2f", $2}')
 hsnr=$(tail $FILENAME_OUT -n 1 | awk '{printf "%0.2f", $5}')
@@ -83,17 +83,30 @@ hccstar=$(tail $FILENAME_OUT -n 1 | awk '{printf "%0.2f", $8}')
 hcc=$(tail $FILENAME_OUT -n 1 | awk '{printf "%0.2f", $7}')
 
 
-
-echo -e "Resolution Limits \AA:         \t ${RES_LIMS} (${H_RES_LIMS})"           >$TABLE1
-echo -e "Merged Crystals:               \t $Number_images "                       >>$TABLE1
-echo -e "No. Unique reflection Indicies:\t $SUM_POSSIBLE "                        >>$TABLE1
+echo -e "Merged Crystals:               \t $Number_images "                       >$TABLE1
 echo -e "No. Merged   Reflections:      \t $NUM_TOTAL_MEAS (${hmeasured})"        >>$TABLE1
+echo -e "No. Unique reflection Indicies:\t $SUM_POSSIBLE "                        >>$TABLE1
+echo -e "Resolution Limits \AA:         \t ${RES_LIMS} (${H_RES_LIMS})"           >>$TABLE1
 echo -e "Completeness (%):              \t $OVERALL_COMPLETENESS (${hcomple})"    >>$TABLE1
+echo "" >>$TABLE1
+echo -e "CC\$_{1/2}\$                   \t $cc (${hcc})"                          >>$TABLE1
+echo -e "R\$_{Split}\$ (%):             \t $rsplit (${hrsplit})"                  >>$TABLE1
 echo -e "Signal to noise:               \t $sigtonoise (${hsnr})"                 >>$TABLE1
 echo -e "Wilson b factor:               \t $wilsonb"                              >>$TABLE1
-echo -e "R\$_{Split}\$ (%):             \t $rsplit (${hrsplit})"                  >>$TABLE1
 echo -e "CC*                            \t $ccstar (${hccstar})"                  >>$TABLE1
-echo -e "CC\$_{1/2}\$                   \t $cc (${hcc})"                          >>$TABLE1
+
+
+
+#echo -e "Resolution Limits \AA:         \t ${RES_LIMS} (${H_RES_LIMS})"           >$TABLE1
+#echo -e "Merged Crystals:               \t $Number_images "                       >>$TABLE1
+#echo -e "No. Unique reflection Indicies:\t $SUM_POSSIBLE "                        >>$TABLE1
+#echo -e "No. Merged   Reflections:      \t $NUM_TOTAL_MEAS (${hmeasured})"        >>$TABLE1
+#echo -e "Completeness (%):              \t $OVERALL_COMPLETENESS (${hcomple})"    >>$TABLE1
+#echo -e "Signal to noise:               \t $sigtonoise (${hsnr})"                 >>$TABLE1
+#echo -e "Wilson b factor:               \t $wilsonb"                              >>$TABLE1
+#echo -e "R\$_{Split}\$ (%):             \t $rsplit (${hrsplit})"                  >>$TABLE1
+#echo -e "CC*                            \t $ccstar (${hccstar})"                  >>$TABLE1
+#echo -e "CC\$_{1/2}\$                   \t $cc (${hcc})"                          >>$TABLE1
 
 
 cp $FILENAME_OUT "Stats_summary.log"
