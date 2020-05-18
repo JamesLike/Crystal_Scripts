@@ -5,12 +5,12 @@ ${filename##*/}
 #dark_model="/home/james/Documents/i24/processing/pH5_dark/CCP4i2/CCP4_JOBS/job_10/10_s_i24_ph5_dark_xyzout_prosmart_refmac.pdb"
 #dark_I="/home/james/Documents/i24/processing/pH5_dark/dat/chip_gorse_hazel_ivory_velvet.hkl"
 #light_I="/home/james/Documents/i24/processing/pH8_dark/dat/chip_alder_ebony2_ficus_carrot.hkl"
-dark_model="/home/james/Documents/tmp/testing/file.pdb"
-dark_I="/home/james/Documents/tmp/testing/1.hkl"
-light_I="/home/james/Documents/tmp/testing/2.hkl"
+dark_model="/home/james/Documents/i24/maps/testing/process_hkl/pH8_dark.pdb"
+dark_I="/home/james/Documents/i24/maps/testing/process_hkl/1/pH8_dark.hkl"
+light_I="/home/james/Documents/i24/maps/testing/process_hkl/1/pH5_dark.hkl"
 #dark_FC="/mnt/data4/XFEL/LR23/DED_tests/dat/dark_F_SFALL_calc.mtz"
 
-loc="/home/james/scripts/diff_maps" #script location, no need for trailing /
+loc="/home/james/PycharmProjects/Crystal_Scripts/maps" #script location, no need for trailing /
 res_high=1.75 #Highest resolution term eg 1.3
 res_low=50 #Lowest resolution term eg 15
 SYMM=19 # Symmetry group eg P212121 of 19
@@ -22,7 +22,7 @@ if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 
 
 cell=$(${loc}/pdb_cell.sh $dark_model)
-dark_FC=`echo ../${dark_model##*/} | sed -e 's/\.pdb$/_SFALL.mtz/'`
+dark_FC=`echo ${dark_model##*/} | sed -e 's/\.pdb$/_SFALL.mtz/'`
 
 Light_base=`echo ${light_I##*/} | sed -e 's/\.hkl$//'`
 Light_1=`echo ${light_I##*/} | sed -e 's/\.hkl$/_old_truncate.mtz/'`

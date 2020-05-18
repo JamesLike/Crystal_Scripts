@@ -1,12 +1,12 @@
 #!/bin/bash
-loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
+loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 # Script to combine dark Fs, lightFs and Fcalcs and then generated Fext and qweighted maps
 
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 
 SYMM=" 19"
-Extrap="yes" #if = yes will make extrapmaps
+Extrap="no" #if = yes will make extrapmaps
 
 if [  "X$#" == "X7" ] ; then
 	dark_model=$1
@@ -42,78 +42,78 @@ awk '{printf "%5i%5i%5i%12.3f%12.3f%12.3f%12.3f%12.3f%12.3f \n",$1, $2, $3, $4, 
 ###################################
 rm -f neg_int.dat COUNT.dat
 
-if [ "$Extrap" == "yes" ] ; then 
-	COUNTER=1
-	while [ $COUNTER -le 300 ] ; do
-		COUNT=$(echo "scale=2; $COUNTER/10" | bc -l)
-		echo "Processing $COUNT"
-		python ${loc}/own_scales/extended_map.py $COUNTER
-		awk '{printf "%5i%5i%5i%12.3f%12.3f%12.3f \n",$1, $2, $3, $4, $5, $6}' Fext_map.dat > Fext_map.hkl #hkl phFC Fext, sigFext
-		awk '{printf "%5i%5i%5i%12.3f%12.3f%12.3f \n",$1, $2, $3, $4, $5, $6}' Fext_unw_map.dat > Fext_unw_map.hkl #hkl phFC Fext, sigFext
-		################
-		# Turn the extended hkls into mtz then into a map (named neg_map.map) which is fed to the negative integration script (M Scmidt)
-		################
-		f2mtz HKLIN Fext_map.hkl HKLOUT James_ext.mtz >log << end_weight 
-		CELL ${cell}
-		SYMM ${SYMM}
-		LABOUT H   K  L   PHI  Fext  sigFext
-		CTYPE  H   H  H   P      F   Q
-		END
-end_weight
-	
-		fft HKLIN James_ext.mtz MAPOUT neg_map.map  >log << END-wfft
-		RESO $res_low $res_high
-		SCALE F1 1.0 0.0
-		GRID 160 160 140
-		BINMAPOUT
-		LABI F1=Fext SIG1=sigFext PHI=PHI
-END-wfft
-	
-		${loc}/progs/neg.sh > neg_${COUNTER}.log
-		grep 'SUM NEGATIVE DENSITY :' neg_${COUNTER}.log | awk '{print $5}' >> neg_int.dat
-		echo $COUNT >> COUNT.dat
-		mv neg_map.map Fext_QW_Phenix_Multiscale_${COUNTER}.map
-		###################################
-		#Now maqke the unweighted map
-		###################################
-		f2mtz HKLIN Fext_unw_map.hkl HKLOUT James_unw_ext.mtz >log << end_weight 
-		CELL ${cell}
-		SYMM ${SYMM}
-		LABOUT H   K  L   PHI  Fext  sigFext
-		CTYPE  H   H  H   P      F   Q
-		END
-end_weight
-			
-		fft HKLIN James_unw_ext.mtz MAPOUT neg_map.map  >log << END-wfft 
-		RESO $res_low $res_high
-		SCALE F1 1.0 0.0
-		#GRID 160 160 140
-		BINMAPOUT
-		LABI F1=Fext SIG1=sigFext PHI=PHI
-END-wfft
-
-    ###################################
-		#Integrate the density and save it
-		###################################
-    ${loc}/progs/neg.sh > neg_unw_${COUNTER}.log
-		grep 'SUM NEGATIVE DENSITY :' neg_unw_${COUNTER}.log | awk '{print $5}' >> neg_unw_int.dat
-		mv neg_map.map Fext_unw_Phenix_Multiscale_${COUNTER}.map
-		mv James_unw_ext.mtz Fext_unw_Phenix_Multiscale_${COUNTER}.mtz
-		COUNTER=$(( $COUNTER + 10))
-	done
-
-	paste COUNT.dat neg_unw_int.dat > neg_unw_count_Phenix.dat
-	paste COUNT.dat neg_int.dat  > neg_count_Phenix.dat
-	#gnuplot -e "set terminal png size 800,600; set output 'count.png'; set xlabel 'N_{EXT}'; set ylabel 'Integrated negative electron density (arb.)'; set key off ; plot 'neg_count.dat' using 1:(\$2*-1) with linespoints"
-	echo "Run GNUPLOT code to view output:"
-	echo "plot \"neg_count.dat\" u 1:(\$2*-1) "
-	###################################
-	## If no Extrap map..
-	###################################
-	else
-	echo "Not running Extrapolated maps"
-	python ${loc}/own_scales/extended_map.py 0
-fi
+#if [ "$Extrap" == "yes" ] ; then
+#	COUNTER=1
+#	while [ $COUNTER -le 300 ] ; do
+#		COUNT=$(echo "scale=2; $COUNTER/10" | bc -l)
+#		echo "Processing $COUNT"
+#		python ${loc}/own_scales/extended_map.py $COUNTER
+#		awk '{printf "%5i%5i%5i%12.3f%12.3f%12.3f \n",$1, $2, $3, $4, $5, $6}' Fext_map.dat > Fext_map.hkl #hkl phFC Fext, sigFext
+#		awk '{printf "%5i%5i%5i%12.3f%12.3f%12.3f \n",$1, $2, $3, $4, $5, $6}' Fext_unw_map.dat > Fext_unw_map.hkl #hkl phFC Fext, sigFext
+#		################
+#		# Turn the extended hkls into mtz then into a map (named neg_map.map) which is fed to the negative integration script (M Scmidt)
+#		################
+#		f2mtz HKLIN Fext_map.hkl HKLOUT James_ext.mtz >log << end_weight
+#		CELL ${cell}
+#		SYMM ${SYMM}
+#		LABOUT H   K  L   PHI  Fext  sigFext
+#		CTYPE  H   H  H   P      F   Q
+#		END
+#end_weight
+#
+#		fft HKLIN James_ext.mtz MAPOUT neg_map.map  >log << END-wfft
+#		RESO $res_low $res_high
+#		SCALE F1 1.0 0.0
+#		GRID 160 160 140
+#		BINMAPOUT
+#		LABI F1=Fext SIG1=sigFext PHI=PHI
+#END-wfft
+#
+#		${loc}/progs/neg.sh > neg_${COUNTER}.log
+#		grep 'SUM NEGATIVE DENSITY :' neg_${COUNTER}.log | awk '{print $5}' >> neg_int.dat
+#		echo $COUNT >> COUNT.dat
+#		mv neg_map.map Fext_QW_Phenix_Multiscale_${COUNTER}.map
+#		###################################
+#		#Now maqke the unweighted map
+#		###################################
+#		f2mtz HKLIN Fext_unw_map.hkl HKLOUT James_unw_ext.mtz >log << end_weight
+#		CELL ${cell}
+#		SYMM ${SYMM}
+#		LABOUT H   K  L   PHI  Fext  sigFext
+#		CTYPE  H   H  H   P      F   Q
+#		END
+#end_weight
+#
+#		fft HKLIN James_unw_ext.mtz MAPOUT neg_map.map  >log << END-wfft
+#		RESO $res_low $res_high
+#		SCALE F1 1.0 0.0
+#		#GRID 160 160 140
+#		BINMAPOUT
+#		LABI F1=Fext SIG1=sigFext PHI=PHI
+#END-wfft
+#
+#    ###################################
+#		#Integrate the density and save it
+#		###################################
+#    ${loc}/progs/neg.sh > neg_unw_${COUNTER}.log
+#		grep 'SUM NEGATIVE DENSITY :' neg_unw_${COUNTER}.log | awk '{print $5}' >> neg_unw_int.dat
+#		mv neg_map.map Fext_unw_Phenix_Multiscale_${COUNTER}.map
+#		mv James_unw_ext.mtz Fext_unw_Phenix_Multiscale_${COUNTER}.mtz
+#		COUNTER=$(( $COUNTER + 10))
+#	done
+#
+#	paste COUNT.dat neg_unw_int.dat > neg_unw_count_Phenix.dat
+#	paste COUNT.dat neg_int.dat  > neg_count_Phenix.dat
+#	#gnuplot -e "set terminal png size 800,600; set output 'count.png'; set xlabel 'N_{EXT}'; set ylabel 'Integrated negative electron density (arb.)'; set key off ; plot 'neg_count.dat' using 1:(\$2*-1) with linespoints"
+#	echo "Run GNUPLOT code to view output:"
+#	echo "plot \"neg_count.dat\" u 1:(\$2*-1) "
+#	###################################
+#	## If no Extrap map..
+#	###################################
+#	else
+#	echo "Not running Extrapolated maps"
+#	python ${loc}/own_scales/extended_map.py 0
+#fi
 
 ###################################
 #Organise data

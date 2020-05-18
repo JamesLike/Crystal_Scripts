@@ -1,5 +1,5 @@
 #!/bin/bash
-loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
+loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 #set obs_map = /home/jb2717/progs/marius/james/dat/test/occupancy_edits/maps/map_4.map
 # sphere center for the double bond:

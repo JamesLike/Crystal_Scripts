@@ -1,5 +1,5 @@
 #!/bin/bash
-loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
+loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 # J Baxter 2020 heavily based on MS in Nat. Methods
 # shell script to scale time-resolved and reference data
 # and calculate difference maps. 
@@ -7,7 +7,7 @@ loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
 phasmin=12.0
 SYMM=" 19" 
 
-if [  "X$#" == "X8" ] ; then
+if [  "X$#" == "X7" ] ; then
 	dark_model=$1
 	model_F=$2
 	dark_obs=$3
@@ -17,7 +17,20 @@ if [  "X$#" == "X8" ] ; then
 	res_high=$6
 	map_high=$6 # high res scalmin / mapmin ?
 	#bin_nam=$7
-	space_group=$8
+	space_group=$7
+	bin_nam="Light"
+else
+  if [  "X$#" == "X6" ] ; then
+	dark_model=$1
+	model_F=$2
+	dark_obs=$3
+	light_obs=$4
+	res_low=$5 # low res resmax
+	scale_high=$6 # high res scalmin / mapmin ?
+	res_high=$6
+	map_high=$6 # high res scalmin / mapmin ?
+	#bin_nam=$7
+	space_group=$(${loc}/pdb_cell.sh $dark_model)
 	bin_nam="Light"
 else
 	echo
@@ -25,7 +38,7 @@ else
 	echo
 	exit 1
 fi
-
+fi
 echo 'Running make_dmap4_James_edited..'
 
 ######################################

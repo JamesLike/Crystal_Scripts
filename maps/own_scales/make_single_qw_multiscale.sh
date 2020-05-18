@@ -1,5 +1,5 @@
 #!/bin/bash
-loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
+loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 SYMM=" 19"
 

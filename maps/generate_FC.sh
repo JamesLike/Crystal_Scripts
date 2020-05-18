@@ -4,7 +4,7 @@
 if [  "X$#" == "X2" ] ; then
 	pdb=$1
 	SYMM=$2
-	mtz=`echo $pdb | sed -e 's/\.pdb$/_SFALL.mtz/'`
+	mtz=$(basename $pdb .pdb)"_SFALL.mtz"
 else
 if [  "X$#" == "X3" ] ; then
 	pdb=$1
@@ -26,7 +26,7 @@ fi
 
 echo "Running generate_FC.."
 base=$(echo $pdb | sed -e 's/\.pdb$//')
-mtz=$(echo $pdb | sed -e 's/\.pdb$/_SFALL.mtz/')
+#mtz=$(echo $pdb | sed -e 's/\.pdb$/_SFALL.mtz/')
 
 sfall XYZIN ${pdb} HKLOUT ${mtz} > ${base}_sfall_out.html << EOF
 labout  FC=FC_ALL PHIC=PHIC_ALL
@@ -36,4 +36,6 @@ badd 0.0
 vdwr 2.5
 end
 EOF
+echo "Filename:" $mtz
+echo "At.. " $(pwd)
 echo "Completed generate_FC.."

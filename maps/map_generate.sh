@@ -1,5 +1,5 @@
 #!/bin/bash
-loc="/home/jb2717/PycharmProjects/Crystal_Scripts/maps"
+loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 # J Baxter 2020
 # Script will generate 4 maps using different scaling methods:
 # 1. Using Marius's merthod: Qwiefghted difference maps scaled using anisotropic b factors then 'refine' scaling, followed then by kraut scaling before making maps.
@@ -31,7 +31,7 @@ echo 'Running map_generate'
 phenix_multiscale=$name"_phenix_multiscale.mtz"
 
 #1:Usage: <dark model (.pdb)> <dark claculated F (.mtz of FC)> <dark obs (.mtz of F and sigF)> <light obs (.mtz of Fobs sigF) <high res> <low res>"
-${loc}/make_dmap4_James_edited.sh $dark_model $dark_FC $dark_obs $light_obs $res_low $res_high $name "$space_group" 
+${loc}/make_dmap4_James_edited.sh $dark_model $dark_FC $dark_obs $light_obs $res_low $res_high "$space_group"
 
 
 #2: Phneix multiscale
