@@ -5,10 +5,11 @@ ${filename##*/}
 #dark_model="/home/james/Documents/i24/processing/pH5_dark/CCP4i2/CCP4_JOBS/job_10/10_s_i24_ph5_dark_xyzout_prosmart_refmac.pdb"
 #dark_I="/home/james/Documents/i24/processing/pH5_dark/dat/chip_gorse_hazel_ivory_velvet.hkl"
 #light_I="/home/james/Documents/i24/processing/pH8_dark/dat/chip_alder_ebony2_ficus_carrot.hkl"
-dark_model="/home/james/Documents/i24/maps/testing/process_hkl/pH8_dark.pdb"
-dark_I="/home/james/Documents/i24/maps/testing/process_hkl/1/pH8_dark.hkl"
-light_I="/home/james/Documents/i24/maps/testing/process_hkl/1/pH5_dark.hkl"
+dark_model="/home/james/Documents/i24/maps/testing/new_uc/pH8_dark.pdb"
+dark_I="/home/james/Documents/i24/maps/testing/prime/pH8_dark_CAD.hkl"
+light_I="/home/james/Documents/i24/maps/testing/prime/pH5_dark_CAD.hkl"
 #dark_FC="/mnt/data4/XFEL/LR23/DED_tests/dat/dark_F_SFALL_calc.mtz"
+#mtz2hkl -f -d IMEAN -s SIGIMEAN pH5_dark.mtz
 
 loc="/home/james/PycharmProjects/Crystal_Scripts/maps" #script location, no need for trailing /
 res_high=1.75 #Highest resolution term eg 1.3

@@ -23,7 +23,7 @@ TEMP_SNR=$(   mktemp -p /tmp mergestats_SNR.XXXXXXXXXX)
 NUM_TOTAL_MEAS=$(grep " measurements in total.$" $FILENAME_LOG | sed -e 's| measurements in total.||g' )
 NUM_TOTAL_REFL=$(grep " reflections in total.$"  $FILENAME_LOG | sed -e 's| reflections in total.||g' )
 OVERALL_REDUNDANCY=$(printf "%.1f" $(echo $NUM_TOTAL_MEAS/$NUM_TOTAL_REFL | bc -l) )
-Number_images=$(/dls/i24/data/2020/mx19458-39/processing/crystFEL/store/indexed_filenames  ../streams/*.stream | wc -l)
+Number_images=0   #$(/dls/i24/data/2020/mx19458-39/processing/crystFEL/store/indexed_filenames  ../streams/*.stream | wc -l)
 
 SUM_MEASURED=$(cut -b 11-20 $FILENAME_SNR | tail -n +2| tr '\n' '+' | sed -e 's|+$| \n|g' | bc -l )
 SUM_POSSIBLE=$(cut -b 20-29 $FILENAME_SNR | tail -n +2| tr '\n' '+' | sed -e 's|+$| \n|g' | bc -l )
@@ -74,7 +74,7 @@ grep "B =" wilson.dat >> $FILENAME_OUT
 echo >>$FILENAME_OUT
 paste -d " " $TEMP_RES $TEMP_SNR $TEMP_RSPLIT $TEMP_CC $TEMP_CCstar                               >>$FILENAME_OUT
 
-TABLE1=$(echo  $FILENAME_RSPLIT | sed -e 's/_Rsplit_/Table1_/g' )#"Table1.dat"
+TABLE1="Table1_"$(echo  $FILENAME_RSPLIT | sed -e 's/_Rsplit_//g' )
 hmeasured=$(tail $FILENAME_OUT -n 1 | awk '{printf "%0.0f", $3}')
 hcomple=$(tail $FILENAME_OUT -n 1 | awk '{printf "%0.2f", $2}')
 hsnr=$(tail $FILENAME_OUT -n 1 | awk '{printf "%0.2f", $5}')
