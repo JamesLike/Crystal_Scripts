@@ -3,21 +3,26 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 # J Baxter 2020 heavily based on MS in Nat. Methods
 # shell script to scale time-resolved and reference data
 # and calculate difference maps. 
+# Output should be:
+# {Something}_wdex.map - a CCP4 format WEIGHTED map extended over the 'crystal'
+# {Something}_wd.map - a CCP4 format WEIGHTED map
+# {Something}_unw.map - a CCP4 standard format differnce map
+if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 
 phasmin=12.0
-SYMM=" 19" 
+SYMM=" 19"
 
 if [  "X$#" == "X7" ] ; then
-	dark_model=$1
-	model_F=$2
-	dark_obs=$3
-	light_obs=$4
-	res_low=$5 # low res resmax
-	scale_high=$6 # high res scalmin / mapmin ? 
+	dark_model=$1 # pdb file
+	model_F=$2 # claculated strucutre factors
+	dark_obs=$3 # Observed dark structure factors with labels F and sigF
+	light_obs=$4 # Observed dark structure factors with labels F and sigF
+	res_low=$5 # low res resmax eg 40A
+	scale_high=$6 # high res scalmin / mapmin ?
 	res_high=$6
 	map_high=$6 # high res scalmin / mapmin ?
 	#bin_nam=$7
-	space_group=$7
+	space_group=$7 # Unit cell dimensions " 10 10 10"
 	bin_nam="Light"
 else
   if [  "X$#" == "X6" ] ; then
@@ -34,12 +39,17 @@ else
 	bin_nam="Light"
 else
 	echo
-	echo "Usage: <dark model (.pdb)> <dark claculated F (.mtz of FC)> <dark obs (.mtz of F and sigF)> <light obs (.mtz of Fobs sigF) <high res> <low res><file prefix name>"
+	echo "Usage: <dark model (.pdb)> <dark claculated F (.mtz of FC)> <dark obs (.mtz of F and sigF)> <light obs (.mtz of Fobs sigF) <high res> <low res> (optional unit cell input - this should be calculated by the pdb_cell.sh script but may break)"
 	echo
 	exit 1
 fi
 fi
 echo 'Running make_dmap4_James_edited..'
+
+if [ ! -f $dark_model ]; then echo "$dark_model not found!" && exit 1 ; fi
+if [ ! -f $model_F ]; then echo "$model_F not found! Please generate using generate_FC" && exit 1 ; fi
+if [ ! -f $dark_obs ]; then echo "$dark_obs not found!" && exit 1 ; fi
+if [ ! -f $light_obs ]; then echo "$light_obs not found!" && exit 1 ; fi
 
 ######################################
 # phase file must be calculated from refined model 
