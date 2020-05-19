@@ -2,7 +2,8 @@
 loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 # J Baxter 2020 heavily based on MS in Nat. Methods
 # shell script to scale time-resolved and reference data
-# and calculate difference maps. 
+# and calculate difference maps.
+# Run as: ./make_dmap4_James_edited.sh pdb.pdb light.mtz ..
 # Output should be:
 # {Something}_wdex.map - a CCP4 format WEIGHTED map extended over the 'crystal'
 # {Something}_wd.map - a CCP4 format WEIGHTED map
