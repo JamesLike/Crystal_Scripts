@@ -16,15 +16,15 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #dark_FC="/mnt/data4/serial/2019_05_p14/processing/q_weighted/q_weighted_EXT_New_FC_2/dark_single.mtz" 
 #dark_obs="/mnt/data4/serial/2019_05_p14/processing/q_weighted/00_phenix_massage_RES_CUT.mtz" 
 
-dark_obs="/mnt/data4/XFEL/LR23/DED_tests/testing/AllRuns-mosflm_total_dark.hkl"
-dark_model="/mnt/data4/XFEL/LR23/DED_tests/dat/Dark.pdb"
+dark_obs="/mnt/data11/LR23_part/store/AllRuns-mosflm_total_dark.hkl"
+dark_model="/mnt/data11/LR23_part/store/Dark.pdb"
 
 #dark_obs="/home/james/Desktop/tmptmptmp/AllRuns-mosflm_total_dark.hkl"
 #dark_model="/home/james/Desktop/tmptmptmp/Dark.pdb"
 
 
-#trunc_type="_phenix_massage.mtz"
-trunc_type="_new_truncate.mtz"
+trunc_type="_phenix_massage.mtz"
+#trunc_type="_new_truncate.mtz"
 
 res_high=1.5 #Highest resolution term eg 1.3
 res_low=30 #Lowest resolution term eg 15

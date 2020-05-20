@@ -45,25 +45,25 @@ echo "Old Truncate.."
 #######################################
 #
 ## Will calculates best estimante of F and I from the distribution of intensities in resolution shell. It tries to put them on an absolute scale busing the scale facotr in the wilson plot -- Ie negatives are NOT preserved.
-truncate HKLIN tmp.mtz HKLOUT $OUTFILE1 > ${BASENAME}_truncate.log << EOF # this is the old version of truncate
-truncate     YES
-anomalous     NO
-resolution  $res_high $res_low
-contents     H 1705     C 1128     N 304     O 328     S 10
-plot     OFF
-header BRIEF BATCH
-labin IMEAN=IMEAN SIGIMEAN=SIGIMEAN
-labout  F=F SIGF=SIGF IMEAN=I SIGIMEAN=SIGI
-falloff     yes     cone 30.0     PLTX
-NOHARVEST
-end
-EOF
+#truncate HKLIN tmp.mtz HKLOUT $OUTFILE1 > ${BASENAME}_truncate.log << EOF # this is the old version of truncate
+#truncate     YES
+#anomalous     NO
+#resolution  $res_high $res_low
+#contents     H 1705     C 1128     N 304     O 328     S 10
+#plot     OFF
+#header BRIEF BATCH
+#labin IMEAN=IMEAN SIGIMEAN=SIGIMEAN
+#labout  F=F SIGF=SIGF IMEAN=I SIGIMEAN=SIGI
+#falloff     yes     cone 30.0     PLTX
+#NOHARVEST
+#end
+#EOF
 ######################################
 ## New Truncate
-echo "NewTruncate.."
+#echo "NewTruncate.."
 ######################################
 #Truncate will use french and wilson based algorithum for scaling the b factors also does anisotrpoic scaling.
-ctruncate -mtzin tmp.mtz -mtzout $OUTFILE2 -colin '/*/*/[IMEAN,SIGIMEAN]' -nres 238 > ${BASENAME}_ctruncate.log
+#ctruncate -mtzin tmp.mtz -mtzout $OUTFILE2 -colin '/*/*/[IMEAN,SIGIMEAN]' -nres 238 > ${BASENAME}_ctruncate.log
 #######################################
 ### Phneix with its massage conversion
 echo "Phenix massage.."
