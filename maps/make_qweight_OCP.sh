@@ -44,7 +44,7 @@ else
 	bin_nam="Light"
 else
 	echo
-	echo "Usage: <dark model (.pdb)> <dark claculated F (.mtz of FC)> <dark obs (.mtz of F and sigF)> <light obs (.mtz of Fobs sigF) <high res> <low res> (optional unit cell input - this should be calculated by the pdb_cell.sh script but may break)"
+	echo "Usage: <dark model (.pdb)> <dark claculated F (.mtz of FC)> <dark obs (.mtz of F and sigF)> <light obs (.mtz of Fobs sigF) <low res> <high res> (optional unit cell input - this should be calculated by the pdb_cell.sh script but may break)"
 	echo
 	exit 1
 fi
