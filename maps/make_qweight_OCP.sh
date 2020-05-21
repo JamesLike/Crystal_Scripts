@@ -8,6 +8,9 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 # {Something}_wdex.map - a CCP4 format WEIGHTED map extended over the 'crystal'
 # {Something}_wd.map - a CCP4 format WEIGHTED map
 # {Something}_unw.map - a CCP4 standard format differnce map
+#####
+# For some unknown reason OCP breaks the scripts.. so I have edited the generation of hkl files using awk instead..
+#####
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 
 phasmin=12.0
@@ -54,8 +57,23 @@ if [ ! -f $dark_obs ]; then echo "$dark_obs not found!" && exit 1 ; fi
 if [ ! -f $light_obs ]; then echo "$light_obs not found!" && exit 1 ; fi
 
 ######################################
-# phase file must be calculated from refined model 
-# dump the file and add column with 1.0 as sigmas 
+#Quick Function for later
+######################################
+pymolfig () {
+	rm -f py_tmp.pml
+	echo load ${dark_model} > py_tmp.pml
+	cp $1 map_mol.ccp4
+	echo load map_mol.ccp4 >> py_tmp.pml
+	cat ${loc}/view_map_OCP.pml >> py_tmp.pml
+	pymol -c ./py_tmp.pml
+	png_name=`echo $1 | sed -e 's/\.map$//'`
+	mv png.png ${png_name}_${res_low}_${res_high}.png
+	rm -f map_mol.ccp4
+}
+
+######################################
+# phase file must be calculated from refined model
+# dump the file and add column with 1.0 as sigmas
 ######################################
 mtz2various HKLIN $model_F  HKLOUT model_phs.hkl << mtz_phs
 	LABIN FP=FC_ALL PHIC=PHIC_ALL
@@ -65,7 +83,7 @@ mtz_phs
 ######################################
 # get the phase file with added sig column into the system
 ######################################
-f2mtz HKLIN model_phs.hkl HKLOUT FC_dark.mtz << f2m_phs 
+f2mtz HKLIN model_phs.hkl HKLOUT FC_dark.mtz << f2m_phs
 	CELL ${space_group}
 	SYMM ${SYMM}
 	LABOUT H   K  L   FC_D SIG_FC_D PHI_D
@@ -77,7 +95,7 @@ f2m_phs
 ######################################
 cad HKLIN1 FC_dark.mtz HKLIN2 $dark_obs HKLIN3 $light_obs HKLOUT all.mtz << END-cad
 	LABIN FILE 1 E1=FC_D E2=SIG_FC_D E3=PHI_D
-	CTYP  FILE 1 E1=F E2=Q E3=P 
+	CTYP  FILE 1 E1=F E2=Q E3=P
 	LABIN FILE 2 E1=F E2=SIGF
 	CTYP  FILE 2 E1=F E2=Q
 	LABO FILE 2 E1=F_Dark E2=SIGF_Dark
@@ -100,7 +118,7 @@ scaleit HKLIN all.mtz HKLOUT all_sc1.mtz << END-scaleit1
 	RESOLUTION  $scale_high $res_low     # Usually better to exclude lowest resolution data
 	#WEIGHT            Sigmas seem to be reliable, so use for weighting
 	EXCLUDE FP SIG 4 FMAX 10000000
-	REFINE ANISOTROPIC 
+	REFINE ANISOTROPIC
 	LABIN FP=FC_D SIGFP=SIGF_Dark FPH1=F_Dark SIGFPH1=SIGF_Dark FPH2=F_${bin_nam} SIGFPH2=SIGF_${bin_nam}
 	CONV ABS 0.0001 TOLR  0.000000001 NCYC 150
 	END
@@ -111,7 +129,7 @@ scaleit HKLIN all_sc1.mtz HKLOUT all_sc2.mtz << END-scaleit2
 	TITLE FPHs scaled to FP
 	RESOLUTION $scale_high $res_low  # Usually better to exclude lowest resolution data
 	#WEIGHT    Sigmas seem to be reliable, so use for weighting
-	REFINE ANISOTROPIC 
+	REFINE ANISOTROPIC
 	EXCLUDE FP SIG 4 FMAX 10000000
 	LABIN FP=F_Dark SIGFP=SIGF_Dark FPH1=F_${bin_nam} SIGFPH1=SIGF_${bin_nam}
 	CONV ABS 0.0001 TOLR  0.000000001 NCYC 40
@@ -137,23 +155,32 @@ fft HKLIN all_sc2.mtz MAPOUT ${bin_nam}_nonw.map << endfft
 	LABI F1=F_${bin_nam} SIG1=SIGF_${bin_nam} F2=F_Dark SIG2=SIGF_Dark PHI=PHI_D
 endfft
 # dump the scaled files to calculate the weighted map
-mtz2various HKLIN all_sc2.mtz  HKLOUT light_scaled.hkl << end_mtzv1
-     LABIN FP=F_${bin_nam} SIGFP=SIGF_${bin_nam}
-     OUTPUT USER '(3I5,2F12.3)'
-     RESOLUTION $res_low $res_high
-end_mtzv1
+#mtz2various HKLIN all_sc2.mtz  HKLOUT light_scaled.hkl << end_mtzv1
+#     LABIN FP=F_${bin_nam} SIGFP=SIGF_${bin_nam}
+#     OUTPUT USER '(3I5,2F12.3)'
+#     RESOLUTION $res_low $res_high
+#end_mtzv1
+#
+#mtz2various HKLIN all_sc2.mtz  HKLOUT dark_scaled.hkl << end_mtzv2
+#     LABIN FP=F_Dark SIGFP=SIGF_Dark
+#     OUTPUT USER '(3I5,2F12.3)'
+#     RESOLUTION $res_low $res_high
+#end_mtzv2
+#
+#mtz2various HKLIN all_sc2.mtz  HKLOUT dark_phase.hkl << end_mtzv3
+#     LABIN FP=FC_D SIGFP=SIG_FC_D PHIC=PHI_D
+#     OUTPUT USER '(3I5,3F12.3)'
+#     RESOLUTION $phasmin $res_high
+#end_mtzv3
 
-mtz2various HKLIN all_sc2.mtz  HKLOUT dark_scaled.hkl << end_mtzv2
-     LABIN FP=F_Dark SIGFP=SIGF_Dark
-     OUTPUT USER '(3I5,2F12.3)'
-     RESOLUTION $res_low $res_high
-end_mtzv2
-
-mtz2various HKLIN all_sc2.mtz  HKLOUT dark_phase.hkl << end_mtzv3
-     LABIN FP=FC_D SIGFP=SIG_FC_D PHIC=PHI_D
-     OUTPUT USER '(3I5,3F12.3)'
-     RESOLUTION $phasmin $res_high 
+mtz2various HKLIN all_sc2.mtz  HKLOUT all_sc3.hkl << end_mtzv3
+     labin  DUM1=FC_D DUM2=SIG_FC_D DUM3=PHI_D DUM4=F_Dark DUM5=SIGF_Dark DUM6=F_Light DUM7=SIGF_Light
+     OUTPUT USER '(3I5,7F12.3)'
 end_mtzv3
+
+awk '{printf "%5i%5i%5i%12.3f%6.2f%14.3f \n",$1, $2, $3, $4, $5, $6}' all_sc3.hkl > dark_phase.hkl
+awk '{printf "%5i%5i%5i%12.3f%12.2f \n",$1, $2, $3, $7, $8}' all_sc3.hkl > dark_scaled.hkl
+awk '{printf "%5i%5i%5i%12.3f%12.2f \n",$1, $2, $3, $9, $10}' all_sc3.hkl > light_scaled.hkl
 
 ######################################
 # Then Generate the  inp for marius' scripts
@@ -171,7 +198,9 @@ ${loc}/progs/weight_zv2 < wmar.inp
 ######################################
 #get files back into mtz
 ######################################
-f2mtz HKLIN ${bin_nam}_dark.phs HKLOUT ${bin_nam}_dwt.mtz << end_weight 
+
+
+f2mtz HKLIN ${bin_nam}_dark.phs HKLOUT ${bin_nam}_dwt.mtz << end_weight
 	CELL ${space_group}
 	SYMM ${SYMM}
 	LABOUT H   K  L   DOBS_${bin_nam}  FOM_${bin_nam}  PHI
@@ -182,8 +211,8 @@ end_weight
 #calculate weighted difference map
 ######################################
 fft HKLIN ${bin_nam}_dwt.mtz MAPOUT ${bin_nam}_wd.map << END-wfft
-	RESO $res_low  $map_high 
-	#GRID 200 200 120
+	RESO $res_low  $map_high
+	GRID 200 200 120
 	BINMAPOUT
 	LABI F1=DOBS_${bin_nam} W=FOM_${bin_nam} PHI=PHI
 END-wfft
@@ -196,8 +225,10 @@ mapmask mapin ${bin_nam}_wd.map mapout ${bin_nam}_wdex.map xyzin $dark_model << 
 	border 0.0
 ee
 
+pymolfig ${bin_nam}_wdex.map
+
 # rm model_phs.hkl FC_dark.mtz
 # rm light_dark.phs
-# rm light_scaled.hkl dark_scaled.hkl dark_phase.hkl 
+# rm light_scaled.hkl dark_scaled.hkl dark_phase.hkl
 # rm all.mtz all_sc1.mtz all_sc2.mtz
 

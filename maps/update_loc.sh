@@ -20,5 +20,6 @@ replace ${DIR}/make_dmap4_James_edited.sh
 replace ${DIR}/phenix_gen_scaled_fs.sh
 replace ${DIR}/progs/neg.sh
 replace ${DIR}/extrap_maps_marius.sh
+replace ${DIR}/extrap_MS_call.sh
 
 echo "Done"
