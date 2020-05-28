@@ -53,10 +53,27 @@ if [ ! -f $model_F ]; then echo "$model_F not found! Please generate using gener
 if [ ! -f $dark_obs ]; then echo "$dark_obs not found!" && exit 1 ; fi
 if [ ! -f $light_obs ]; then echo "$light_obs not found!" && exit 1 ; fi
 
-
 ######################################
-# phase file must be calculated from refined model 
-# dump the file and add column with 1.0 as sigmas 
+# Quick Function for later
+# Edit the view_map_PYP.pml file with the correct 'view'
+# (open pymol with pdb file and do get_view and paste it view_map_PYP.pml)
+# Should then just be able to call function below as:
+# pymolfig <map name>
+######################################
+pymolfig () {
+	rm -f py_tmp.pml
+	echo load ${dark_model} > py_tmp.pml
+	cp $1 map_mol.ccp4
+	echo load map_mol.ccp4 >> py_tmp.pml
+	cat ${loc}/view_map_PYP.pml >> py_tmp.pml
+	pymol -c ./py_tmp.pml
+	png_name=`echo $1 | sed -e 's/\.map$//'`
+	mv png.png ${png_name}_${res_low}_${res_high}.png
+	rm -f map_mol.ccp4
+}
+######################################
+# phase file must be calculated from refined model
+# dump the file and add column with 1.0 as sigmas
 ######################################
 mtz2various HKLIN $model_F  HKLOUT model_phs.hkl << mtz_phs
 	LABIN FP=FC_ALL PHIC=PHIC_ALL
@@ -66,7 +83,7 @@ mtz_phs
 ######################################
 # get the phase file with added sig column into the system
 ######################################
-f2mtz HKLIN model_phs.hkl HKLOUT FC_dark.mtz << f2m_phs 
+f2mtz HKLIN model_phs.hkl HKLOUT FC_dark.mtz << f2m_phs
 	CELL ${space_group}
 	SYMM ${SYMM}
 	LABOUT H   K  L   FC_D SIG_FC_D PHI_D
@@ -78,7 +95,7 @@ f2m_phs
 ######################################
 cad HKLIN1 FC_dark.mtz HKLIN2 $dark_obs HKLIN3 $light_obs HKLOUT all.mtz << END-cad
 	LABIN FILE 1 E1=FC_D E2=SIG_FC_D E3=PHI_D
-	CTYP  FILE 1 E1=F E2=Q E3=P 
+	CTYP  FILE 1 E1=F E2=Q E3=P
 	LABIN FILE 2 E1=F E2=SIGF
 	CTYP  FILE 2 E1=F E2=Q
 	LABO FILE 2 E1=F_Dark E2=SIGF_Dark
@@ -101,7 +118,7 @@ scaleit HKLIN all.mtz HKLOUT all_sc1.mtz << END-scaleit1
 	RESOLUTION  $scale_high $res_low     # Usually better to exclude lowest resolution data
 	#WEIGHT            Sigmas seem to be reliable, so use for weighting
 	EXCLUDE FP SIG 4 FMAX 10000000
-	REFINE ANISOTROPIC 
+	REFINE ANISOTROPIC
 	LABIN FP=FC_D SIGFP=SIGF_Dark FPH1=F_Dark SIGFPH1=SIGF_Dark FPH2=F_${bin_nam} SIGFPH2=SIGF_${bin_nam}
 	CONV ABS 0.0001 TOLR  0.000000001 NCYC 150
 	END
@@ -112,7 +129,7 @@ scaleit HKLIN all_sc1.mtz HKLOUT all_sc2.mtz << END-scaleit2
 	TITLE FPHs scaled to FP
 	RESOLUTION $scale_high $res_low  # Usually better to exclude lowest resolution data
 	#WEIGHT    Sigmas seem to be reliable, so use for weighting
-	REFINE ANISOTROPIC 
+	REFINE ANISOTROPIC
 	EXCLUDE FP SIG 4 FMAX 10000000
 	LABIN FP=F_Dark SIGFP=SIGF_Dark FPH1=F_${bin_nam} SIGFPH1=SIGF_${bin_nam}
 	CONV ABS 0.0001 TOLR  0.000000001 NCYC 40
@@ -153,7 +170,7 @@ end_mtzv2
 mtz2various HKLIN all_sc2.mtz  HKLOUT dark_phase.hkl << end_mtzv3
      LABIN FP=FC_D SIGFP=SIG_FC_D PHIC=PHI_D
      OUTPUT USER '(3I5,3F12.3)'
-     RESOLUTION $phasmin $res_high 
+     RESOLUTION $phasmin $res_high
 end_mtzv3
 
 ######################################
@@ -172,7 +189,7 @@ ${loc}/progs/weight_zv2 < wmar.inp
 ######################################
 #get files back into mtz
 ######################################
-f2mtz HKLIN ${bin_nam}_dark.phs HKLOUT ${bin_nam}_dwt.mtz << end_weight 
+f2mtz HKLIN ${bin_nam}_dark.phs HKLOUT ${bin_nam}_dwt.mtz << end_weight
 	CELL ${space_group}
 	SYMM ${SYMM}
 	LABOUT H   K  L   DOBS_${bin_nam}  FOM_${bin_nam}  PHI
@@ -183,7 +200,7 @@ end_weight
 #calculate weighted difference map
 ######################################
 fft HKLIN ${bin_nam}_dwt.mtz MAPOUT ${bin_nam}_wd.map << END-wfft
-	RESO $res_low  $map_high 
+	RESO $res_low  $map_high
 	#GRID 200 200 120
 	BINMAPOUT
 	LABI F1=DOBS_${bin_nam} W=FOM_${bin_nam} PHI=PHI
@@ -191,14 +208,47 @@ END-wfft
 ######################################
 #Extend over the crystal.
 ######################################
-
 mapmask mapin ${bin_nam}_wd.map mapout ${bin_nam}_wdex.map xyzin $dark_model << ee
 	extend xtal
 	border 0.0
 ee
+######################################
+# Make the pymol figure
+######################################
+pymolfig ${bin_nam}_wdex.map
+
+######################################
+#Integrate negative density:
+######################################
+obs_map=${bin_nam}_wdex.map
+xc=13.8
+yc=1.2
+zc=-19.6
+
+radius=5.0 #4 #8.0
+sigma=2.0  # 2 #2 #1.5
+out_map=mask_1.map
+
+echo $obs_map > neg.inp
+echo $out_map >> neg.inp
+echo 6  >> neg.inp
+echo X,Y,Z >> neg.inp
+echo  -Y,X-Y,Z >> neg.inp
+echo  Y-X,-X,Z >> neg.inp
+echo  -X,-Y,1/2+Z >> neg.inp
+echo  Y,Y-X,1/2+Z >> neg.inp
+echo  X-Y,X,1/2+Z >> neg.inp
+echo $xc $yc $zc >> neg.inp # Centre of sphere
+echo $radius >> neg.inp
+echo $sigma >> neg.inp
+
+echo "-Integrating negative density "
+${loc}/progs/NegExCCP4_v2 < neg.inp > neg_Mari.log # Check where yout NegExCCP4v2 script is kept and point this line there
+
+grep 'SUM NEGATIVE DENSITY :' neg_Mari.log | awk '{print $5}' >> neg_int.dat
 
 # rm model_phs.hkl FC_dark.mtz
 # rm light_dark.phs
-# rm light_scaled.hkl dark_scaled.hkl dark_phase.hkl 
+# rm light_scaled.hkl dark_scaled.hkl dark_phase.hkl
 # rm all.mtz all_sc1.mtz all_sc2.mtz
 

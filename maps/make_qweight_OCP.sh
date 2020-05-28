@@ -155,32 +155,32 @@ fft HKLIN all_sc2.mtz MAPOUT ${bin_nam}_nonw.map << endfft
 	LABI F1=F_${bin_nam} SIG1=SIGF_${bin_nam} F2=F_Dark SIG2=SIGF_Dark PHI=PHI_D
 endfft
 # dump the scaled files to calculate the weighted map
-#mtz2various HKLIN all_sc2.mtz  HKLOUT light_scaled.hkl << end_mtzv1
-#     LABIN FP=F_${bin_nam} SIGFP=SIGF_${bin_nam}
-#     OUTPUT USER '(3I5,2F12.3)'
-#     RESOLUTION $res_low $res_high
-#end_mtzv1
-#
-#mtz2various HKLIN all_sc2.mtz  HKLOUT dark_scaled.hkl << end_mtzv2
-#     LABIN FP=F_Dark SIGFP=SIGF_Dark
-#     OUTPUT USER '(3I5,2F12.3)'
-#     RESOLUTION $res_low $res_high
-#end_mtzv2
-#
-#mtz2various HKLIN all_sc2.mtz  HKLOUT dark_phase.hkl << end_mtzv3
-#     LABIN FP=FC_D SIGFP=SIG_FC_D PHIC=PHI_D
-#     OUTPUT USER '(3I5,3F12.3)'
-#     RESOLUTION $phasmin $res_high
-#end_mtzv3
+mtz2various HKLIN all_sc2.mtz  HKLOUT light_scaled.hkl << end_mtzv1
+     LABIN FP=F_${bin_nam} SIGFP=SIGF_${bin_nam}
+     OUTPUT USER '(3I5,2F12.3)'
+     RESOLUTION $res_low $res_high
+end_mtzv1
 
-mtz2various HKLIN all_sc2.mtz  HKLOUT all_sc3.hkl << end_mtzv3
-     labin  DUM1=FC_D DUM2=SIG_FC_D DUM3=PHI_D DUM4=F_Dark DUM5=SIGF_Dark DUM6=F_Light DUM7=SIGF_Light
-     OUTPUT USER '(3I5,7F12.3)'
+mtz2various HKLIN all_sc2.mtz  HKLOUT dark_scaled.hkl << end_mtzv2
+     LABIN FP=F_Dark SIGFP=SIGF_Dark
+     OUTPUT USER '(3I5,2F12.3)'
+     RESOLUTION $res_low $res_high
+end_mtzv2
+
+mtz2various HKLIN all_sc2.mtz  HKLOUT dark_phase.hkl << end_mtzv3
+     LABIN FP=FC_D SIGFP=SIG_FC_D PHIC=PHI_D
+     OUTPUT USER '(3I5,3F12.3)'
+     RESOLUTION $phasmin $res_high
 end_mtzv3
 
-awk '{printf "%5i%5i%5i%12.3f%6.2f%14.3f \n",$1, $2, $3, $4, $5, $6}' all_sc3.hkl > dark_phase.hkl
-awk '{printf "%5i%5i%5i%12.3f%12.2f \n",$1, $2, $3, $7, $8}' all_sc3.hkl > dark_scaled.hkl
-awk '{printf "%5i%5i%5i%12.3f%12.2f \n",$1, $2, $3, $9, $10}' all_sc3.hkl > light_scaled.hkl
+#mtz2various HKLIN all_sc2.mtz  HKLOUT all_sc3.hkl << end_mtzv3
+#     labin  DUM1=FC_D DUM2=SIG_FC_D DUM3=PHI_D DUM4=F_Dark DUM5=SIGF_Dark DUM6=F_Light DUM7=SIGF_Light
+#     OUTPUT USER '(3I5,7F12.3)'
+#end_mtzv3
+#
+#awk '{printf "%5i%5i%5i%12.3f%6.2f%14.3f \n",$1, $2, $3, $4, $5, $6}' all_sc3.hkl > dark_phase.hkl
+#awk '{printf "%5i%5i%5i%12.3f%12.2f \n",$1, $2, $3, $7, $8}' all_sc3.hkl > dark_scaled.hkl
+#awk '{printf "%5i%5i%5i%12.3f%12.2f \n",$1, $2, $3, $9, $10}' all_sc3.hkl > light_scaled.hkl
 
 ######################################
 # Then Generate the  inp for marius' scripts

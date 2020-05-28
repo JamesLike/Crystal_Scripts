@@ -27,14 +27,14 @@ BASENAME=$(echo $HKL_FILENAME | sed -e 's/\.hkl$//')
 ## Make hkl into an mtz
 #echo "Running f2mtz.."
 ######################################
-#f2mtz HKLIN $TMPHKL HKLOUT tmp.mtz >> ${BASENAME}_f2mtz_out.html << EOF
-#CELL ${space_group}
-#SYMM ${SYMM}
-#SKIP 3
-#LABOUT H K L IMEAN SIGIMEAN
-#CTYPE  H H H J     Q
-#FORMAT '(3(F4.0,1X),F10.2,10X,F10.2)'
-#EOF
+f2mtz HKLIN $TMPHKL HKLOUT tmp.mtz >> ${BASENAME}_f2mtz_out.html << EOF
+CELL ${space_group}
+SYMM ${SYMM}
+SKIP 3
+LABOUT H K L IMEAN SIGIMEAN
+CTYPE  H H H J     Q
+FORMAT '(3(F4.0,1X),F10.2,10X,F10.2)'
+EOF
 ############################################################################
 ## If using DIALS MTZ (renamed as a .hkl)..
 ############################################################################
