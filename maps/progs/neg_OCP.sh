@@ -3,9 +3,9 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 # Need to choose somewhere for sphere...
 obs_map="./neg_map.map"
-xc=-3.66
-yc=6.86
-zc=-19.88
+xc=-22.0
+yc=11.0
+zc=-3.0
 
 radius=5 #4 #8.0
 sigma=2  # 2 #2 #1.5
