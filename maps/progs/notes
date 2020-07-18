@@ -1,0 +1,2 @@
+Had to recompile for Ubuntu +18. Used gfortran-6:
+gfortran-6 <scripts>

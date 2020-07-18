@@ -1,0 +1,930 @@
+! ============================================
+! ====   ATTENTION, ATTENTION              ===
+! NOTE: PROGRAM NOT GENERAL FOR ALL CCP4 MAPS
+! ONLY FOR GRID ORDERS AS IN CCP4 MAPS AS IN PYP
+!
+! ===========================================
+!
+! WITHIN A CERTAIN MASK
+! 
+! ALGORITHM
+! READ IN EXTRAPOLATED MAP
+! SPECIFY MASK (COORDINATES AND RADIUS)
+! SUM ALL GRID POINTS IN THE MASK < SPECIFIED SIGMA
+! 
+! 
+! WORKS  WITH MAPS IN CCP4 FORMAT 
+! version 2.ccp4:    Marius Schmidt May 2019
+
+
+COMMON /MAPIO/ INMAP, IOMAP, NHDRS, CCELL, NNSYM, NX, NY, NZ, &
+        AMN, AMX, AMEAN, ARMS, BUFI
+DIMENSION CCELL(6), BUFI(20000000)
+
+DIMENSION RHOO(500000), MASK(500000)
+CHARACTER*80 FRO, OUTMAP
+
+CHARACTER*36 SYMOP(24)
+DIMENSION SYM(3, 4, 24)
+
+WRITE(*, 100) 'OBSEREVED DIFFERENCE ELECTRON DENSITY        : '
+READ(*, 200)   FRO
+WRITE(*, 300)  FRO(1:40)
+WRITE(*, 100) 'OUTPUT MAP DISPAYING SPHERICAL VOLUME ONLY   : '
+READ(*, 200)   OUTMAP
+WRITE(*, 300)  OUTMAP(1:40)
+
+
+! 
+! SYMMETRY OPERATORS
+WRITE(*, *)
+WRITE(*, *)
+
+WRITE(*, *) ' READ SYMMETRY OPERATORS (FOR OUTPUT ONLY) ===> '
+READ(*, *) NSYM
+DO 1300 I = 1, NSYM
+    READ(*, '(A)') SYMOP(I)
+    J = MATSYM(SYM(1, 1, I), SYMOP(I), ICOL)
+    IF (J .LE. 0) GO TO 1300
+    WRITE(*, 1200) J, I, SYMOP, ICOL
+    1200    FORMAT(' ERROR NUMBER', I2, ' AT MATSYM IN SYMMETRY OPERATOR', I2, &
+            /, '->', A36, /, &
+            ' AT CHARACTER POSITION ', I2)
+    STOP ' MATSYM ERROR '
+1300    WRITE(*, 1400) I, SYMOP(I), ((SYM(J, K, I), K = 1, 4), J = 1, 3)
+1400    FORMAT(/, 'SYMMETRY OPERATOR: ', I2, 5X, A36, /, &
+        3(5X, 3F5.1, 5X, F10.5, /))
+
+WRITE(*, *)
+WRITE(*, 100) 'READ MASK COORDINATES                        : '
+READ(*, *)     X, Y, Z
+WRITE(*, 400)  X, Y, Z
+WRITE(*, 100) 'READ MASK RADIUS                             : '
+READ(*, *) RADIUS, RSIGMA
+WRITE(*, 500) RADIUS, RSIGMA
+
+100    FORMAT(A)
+200    FORMAT(A)
+300    FORMAT(' FILE: ', A40)
+400    FORMAT(' MASK COORDINATES X Y Z :  ', 3F8.3)
+500    FORMAT(' MASK RADIUS            :  ', F8.3, /, &
+        ' GRIDS < -FACTOR * RMSD :  ', F8.3)
+
+
+! PREPARE OBSERVED MAP 
+CALL RDCCP4(FRO)
+ARMS1 = ARMS
+CALL SETMAT(CCELL)
+CALL GEN_MASK(RADIUS, X, Y, Z, MASK, NM)
+WRITE(*, 600) NM
+600    FORMAT(' NUMBER OF GRID POINTS IN MASK : ', I15)
+
+! GETRHO OPERATES ON BUFI. SINCE BUFI CONTAINS
+! ALL THE MAP INCL. HEADER, MASK MUST CONTAIN 
+! NGRID+NHDRS 
+
+CALL GETRHO(MASK, RHOO, NM)
+
+
+! SUM VOXEL VALUES 
+CALL EMAPSUM(RHOO, NM, ARMS1, RSIGMA, IP, RR)
+
+WRITE(*, *)
+WRITE(*, *)
+WRITE(*, *)  ' ===================================== '
+WRITE(*, *)  ' ===================================== '
+WRITE(*, *)
+WRITE(*, 900) RSIGMA, IP, NM, RR
+900    FORMAT(' NEGATIVE DENSITY EVALUATION ', /, &
+        ' MATCHED GRID POINTS < ', F10.3, ' SIGMA ', I15, /, &
+        ' SELECTED FROM GRID POINTS IN MASK      ', I15, /, &
+        ' SUM NEGATIVE DENSITY :                 ', F15.3)
+WRITE(*, *)
+WRITE(*, *)  ' ===================================== '
+WRITE(*, *)  ' ===================================== '
+
+
+
+! ===================================== 
+! ONLY RELEVANT FOR OUTPUT MAP, MAP/MASK CAN BE CHECKED IN COOT
+! SYMOPS ARE USED TO RECONSTRUCT UNIT CELL
+! DELETE BUFI AFTER HEADER
+
+! DELETE BUFFER       
+IR = NX * NY * NZ
+DO 1900 I = NHDRS + 1, IR + NHDRS
+    BUFI(I) = 0.0
+1900  CONTINUE
+
+! WRITE OUT SPHERE
+! EXPAND BY SYMOPS
+! Y IS KKK
+! Z IS JJJ
+! X IS III
+
+DO 3300 I = 1, NM
+
+    NGRID = MASK(I) - NHDRS
+
+
+    ! FOR PYP (Z-SECTIONS, X-ROWS, Y-COLUMNS)
+    Z = INT(NGRID / (NX * NY)) / FLOAT(NZ)
+    NXY = MOD(NGRID, NX * NY)
+    IF (NXY.EQ.0) NXY = NX * NY
+    X = INT(NXY / NY) / FLOAT(NX)
+    NNY = MOD(NGRID, NY)
+    IF (NNY.EQ.0) NNY = NY
+    Y = NNY / FLOAT(NY)
+
+    DO 2300  J = 1, NSYM
+        XP = SYM(1, 1, J) * X + SYM(1, 2, J) * Y + SYM(1, 3, J) * Z + SYM(1, 4, J)
+        YP = SYM(2, 1, J) * X + SYM(2, 2, J) * Y + SYM(2, 3, J) * Z + SYM(2, 4, J)
+        ZP = SYM(3, 1, J) * X + SYM(3, 2, J) * Y + SYM(3, 3, J) * Z + SYM(3, 4, J)
+        XP = AMOD(XP, 1.0)
+        YP = AMOD(YP, 1.0)
+        ZP = AMOD(ZP, 1.0)
+        !          write(*,*) xp,yp,zp
+        IF (XP .LT. 0.0) XP = XP + 1.0
+        IF (YP .LT. 0.0) YP = YP + 1.0
+        IF (ZP .LT. 0.0) ZP = ZP + 1.0
+
+        II = XP * NX
+        KK = YP * NY
+        JJ = ZP * NZ
+        ! JJ IS Z, KK IS Y, II IS X
+
+        ! PYP
+        NNGRID = JJ * NX * NY + II * NY + KK
+
+
+        ! FOR TEST ONLY
+        !          IF (J.EQ.1) WRITE(*,*) NGRID,NNGRID
+
+        BUFI(NNGRID + NHDRS) = 2.0
+
+    2300   CONTINUE
+
+3300  CONTINUE
+
+WRITE(*, *)
+WRITE(*, *) 'WRITE EMPTY MAP WITH MASK FOR CHECK ONLY '
+NTOT = IR + NHDRS
+NBYTE = NTOT * 4
+WRITE(*, 3500) NTOT, NBYTE
+3500  FORMAT(' EMPTY MAP WRITTEN OUT, WITH MASK VOLUME FILLED WITH RHO = 2.0 ', /, &
+        ' TOTAL NUMBER OF WORDS, TOTAL NUMBER OF BYTES : ', 2I15)
+open(unit = 11, file = OUTMAP, access = 'direct', &
+        form = 'unformatted', recl = NBYTE)
+WRITE(11, rec = 1) BUFI(1:NTOT)
+close(11)
+
+END
+
+
+SUBROUTINE EMAPSUM(RHO1, NM, AR1, RS, IPOS, RR)
+    !
+    ! calculates the AVERAGE negative density BELOW -RS * AR1  in a mask
+    !
+
+    DIMENSION RHO1(1)
+    RSM1 = 0.0
+    IPOS = 0
+    ANUM = 0.0
+    DNM1 = 0.0
+    ! PEARSON CORRELATION
+    ! RSMs ARE USUALLY ZERO,,, MIGHT NOT BE IN BLOB
+    ! PICK MAP1 (REFERENCE MAP)
+    DO 1000 I = 1, NM
+        IF  (RHO1(I).LT.-RS * AR1) THEN
+            RSM1 = RSM1 + RHO1(I)
+            IPOS = IPOS + 1
+        ENDIF
+    1000   CONTINUE
+    !        RSM1=RSM1/IPOS
+
+    RR = RSM1
+
+    RETURN
+END
+
+
+SUBROUTINE GETRHO(MASK, RHO, NP)
+    ! MASK: CONTAINS GRIDPOINT NUMBER (OUTPUT)
+    ! RHO : CONTAINS RHO AT GRIDPOINT NUMBER (OUTPUT)
+    ! NP  : NUMBER OF POINTS IN MASK
+    ! USES GRID VALUES STORED IN MASK TO EXTRACT
+    ! RHO VALUES FROM A MAP
+    ! MAP MUST BE CALCULATED ON SAME GRID AS
+    ! MASK
+    !
+    ! NOTE ! CCELL IS OBSOLETE IN THIS SUBROUTINE SINCE
+    ! INPUT BY INPUT FILE
+
+    COMMON /MAPIO/ INMAP, IOMAP, NHDRS, CCELL, NNSYM, NX, NY, NZ, &
+            AMN, AMX, AMEAN, ARMS, BUFI
+    DIMENSION CCELL(6), BUFI(20000000)
+
+    COMMON /CORRECT/ CORRF(50), RLASER(50)
+    !
+    DIMENSION MASK(1)
+    DIMENSION RHO(1)
+    DO  900 I = 1, NP
+        NGRID = MASK(I)
+        RHO(I) = BUFI(NGRID)
+    900  CONTINUE
+    RETURN
+END
+
+
+SUBROUTINE OL(XF, YF, ZF, D)
+    ! DETERMINES ORHOGONAL LENGTH OF FRACTIONAL VECTOR XF,YF,ZF
+    ! COMMON
+    COMMON /MATRIX/  MAT11, MAT12, MAT13, MAT22, MAT23, MAT33, &
+            IMAT11, IMAT12, IMAT13, IMAT22, IMAT23, IMAT33
+    REAL*4  MAT11, MAT12, MAT13, MAT22, MAT23, MAT33
+    REAL*4  IMAT11, IMAT12, IMAT13, IMAT22, IMAT23, IMAT33
+
+    XO = XF * MAT11 + YF * MAT12 + ZF * MAT13
+    YO = YF * MAT22 + ZF * MAT23
+    ZO = ZF * MAT33
+    D = SQRT(XO**2 + YO**2 + ZO**2)
+    RETURN
+END
+
+
+SUBROUTINE GEN_MASK(RADIUS, X, Y, Z, MASK, NM)
+    ! PRETTY OBVIOUS
+    !
+    ! SPHERE WILL BE GENERATED WITH RADIUS AROUND X,Y,Z
+    ! AND GRID POINT NUMBER WILL BE STORED IN MASK. GRID
+    ! POINT NUMBER IS FULLY DETERMINED BY NX,NY,NZ AND
+    ! THE CELL CONSTANTS, NO MAP NEED TO BE READ IN UNLESS
+    ! INFORMATION OF NX,NY,NZ AND CELL IS NEEDED FROM THE
+    ! HEADER.
+    ! NM CONTAINS TOTAL NUMBER OF GRID POINTS IN MASK
+    !
+
+    COMMON /MAPIO/ INMAP, IOMAP, NHDRS, CCELL, NNSYM, NX, NY, NZ, &
+            AMN, AMX, AMEAN, ARMS, BUFI
+    DIMENSION CCELL(6), BUFI(20000000)
+    COMMON /CORRECT/ CORRF(50), RLASER(50)
+
+    !
+    DIMENSION MASK(1)
+    !
+    !
+    ! DETERMINE X-MAX/MIN,Y-MAX/MIN,ZMAX/MIN IN SPHERE
+    ! ADD ABOUT HALF OF A GRID POINT:
+    XA = CCELL(1) / (2 * NX)
+    YA = CCELL(2) / (2 * NY)
+    ZA = CCELL(3) / (2 * NZ)
+
+    !
+    XMAX = X + (RADIUS + XA)
+    XMIN = X - (RADIUS + XA)
+    YMAX = Y + (RADIUS + YA)
+    YMIN = Y - (RADIUS + YA)
+    ZMAX = Z + (RADIUS + ZA)
+    ZMIN = Z - (RADIUS + ZA)
+
+    !        write(*,*) 'head, cell ', nhdrs,ccell,xmax,xmin,ymax,ymin,zmax,zmin
+
+    ! FRACTIONALIZE COORDINATE AND EXTREMA IN SPHERE TO DETERMINE
+    ! WHERE TO RUN, COORDINATE IS TAKEN AS IT IS  (CARE FOR PERIODIC
+    ! BOUNARY LATER)
+    CALL O2F(X, Y, Z, XF, YF, ZF)
+    CALL O2F(XMAX, Y, Z, XMXF, DUMM, DUMMY)
+    CALL O2F(XMIN, Y, Z, XMNF, DUMM, DUMMY)
+    CALL O2F(X, YMAX, Z, DUMM, YMXF, DUMMY)
+    CALL O2F(X, YMIN, Z, DUMM, YMNF, DUMMY)
+    CALL O2F(X, Y, ZMAX, DUMM, DUMMY, ZMXF)
+    CALL O2F(X, Y, ZMIN, DUMM, DUMMY, ZMNF)
+
+    write(*, 200) xmin, xmax, ymin, ymax, zmin, zmax
+    200    FORMAT(' BOX FROM XMIN TO XMAX,      YMIN TO YMAX,      ZMIN TO ZMAX ', /, &
+            '       ', 2F8.3, ' ||  ', 2F8.3, ' ||  ', 2F8.3, /)
+
+
+    ! DETERMINE SEARCH BOX BOUNDARIES:
+    ! FRACTIONAL TO GRID INT(FC*NX)+1
+    ! NINT NOT VERY RELIABLE
+    NXMX = INT(XMXF * NX) + 2
+    NXMN = INT(XMNF * NX) - 2
+    NYMX = INT(YMXF * NY) + 2
+    NYMN = INT(YMNF * NY) - 2
+    NZMX = INT(ZMXF * NZ) + 2
+    NZMN = INT(ZMNF * NZ) - 2
+
+
+    ! RUN THROUGH SEARCH BOX
+    LL = 0
+    NNX = NXMX - NXMN
+    NNY = NYMX - NYMN
+    NNZ = NZMX - NZMN
+
+    WRITE(*, 300) nxmn, nymn, nzmn, nxmx, nymx, nzmx, nnx, nny, nnz
+    300    FORMAT(' BOX GRID FROM NXMIN TO NXMAX, NYMIN TO NYMAX, NZMIN TO NZMAX ', /, &
+            ' NXMIN   ', I8, ' || NYMIN  ', I8, ' || NZMIN  ', I8, /, &
+            ' NXMAX   ', I8, ' || NYMAX  ', I8, ' || NZMAX  ', I8, /, &
+            ' TOTALX  ', I8, ' || TOTALY ', I8, ' || TOTALZ ', I8)
+
+    DO 1500 JJ = 1, NNZ
+        DO 1400 KK = 1, NNY
+            DO 1300 II = 1, NNX
+                ! DON'T MIND NEGATIVE VALUES
+                ! NEGATIVE (ZERO) GRID VALUES WILL BE CORRECTED BY PERIODIC
+                ! BOUDARIES LATER IN THE PROGRAM
+                !
+                J = NZMN + JJ - 1
+                K = NYMN + KK - 1
+                I = NXMN + II - 1
+                GFX = FLOAT(I) / FLOAT(NX)
+                GFY = FLOAT(K) / FLOAT(NY)
+                GFZ = FLOAT(J) / FLOAT(NZ)
+                ! DETERMINE FRACTIONAL DISTANCES BETWEEN COORDINATES
+                DX = GFX - XF
+                DY = GFY - YF
+                DZ = GFZ - ZF
+                !
+                ! DETERMINe LENGTH OF VECTOR DX,DY,DZ IN ORTHO
+                ! SUBROUTINE OL TAKES SQRT
+                CALL OL(DX, DY, DZ, DIST)
+
+                IF (DIST.LT.RADIUS) THEN
+                    LL = LL + 1
+
+                    ! PERIODIC BOUNDARY CONDITIONS:
+                    KKK = K
+                    JJJ = J
+                    III = I
+                    ! IF NEGATIVE SUBSTRACT ABSOLUTE GRID (ADD NEGATIVE)
+                    IF (KKK.LE.0)     KKK = NY + KKK
+                    IF (KKK.GT.NY)    KKK = KKK - NY
+                    IF (JJJ.LE.0)     JJJ = NZ + JJJ
+                    IF (JJJ.GT.NZ)    JJJ = JJJ - NZ
+                    IF (III.LE.0)     III = NX + III
+                    IF (III.GT.NX)    III = III - NX
+                    ! STORE GRID VALUE IN MASK
+
+                    ! Y IS KKK
+                    ! Z IS JJJ
+                    ! X IS III
+
+
+
+                    ! Z SECTIONS, ROWS IS X, COLUMNS IS Y E.G. FOR PYP
+                    NGRID = JJJ * NX * NY + III * NY + KKK
+                    !            write(*,*) LL,NGRID
+                    MASK(LL) = NGRID + NHDRS
+                ENDIF
+            1300  CONTINUE
+        1400  CONTINUE
+    1500  CONTINUE
+    1302  CONTINUE
+    NM = LL
+    RETURN
+END
+
+
+!
+SUBROUTINE O2F(X, Y, Z, XF, YF, ZF)
+    ! FRACTIONALIZES VECTOR X,Y,Z
+    COMMON /MATRIX/  MAT11, MAT12, MAT13, MAT22, MAT23, MAT33, &
+            IMAT11, IMAT12, IMAT13, IMAT22, IMAT23, IMAT33
+    REAL*4  MAT11, MAT12, MAT13, MAT22, MAT23, MAT33
+    REAL*4  IMAT11, IMAT12, IMAT13, IMAT22, IMAT23, IMAT33
+
+    XF = x * IMAT11 + y * IMAT12 + z * IMAT13
+    YF = y * IMAT22 + z * IMAT23
+    ZF = z * IMAT33
+    ! TAKE CARE OF PERIODIC BOUNDARIES SOMEWHERE ELSE
+    !        XF=AMOD(XF,1.0)
+    !        YF=AMOD(YF,1.0)
+    !        ZF=AMOD(ZF,1.0)
+    !        IF (XF.LT.0.0) XF=XF+1.0
+    !        IF (YF.LT.0.0) YF=YF+1.0
+    !        IF (ZF.LT.0.0) ZF=ZF+1.0
+
+    RETURN
+END
+
+
+SUBROUTINE RDCCP4(FNAM)
+
+    ! IN CCP4 MAPS, THE HEADER IS ALWAYS 1024 BYTES
+    ! THIS CLEARLY FAVOURS THE SIZE OF THE BUFFER BEEING 1024 BYTES
+    ! THIS SUBROUTINE CALCULATES THE SIZE OF THE ENTIRE MAP
+    ! FROM HEADER INFORMATION. THEN CLOSES THE FILE, AND REOPENS
+    ! WITH THIS SIZE INFORMATION. IT READS THEN ONLY _ONE_ RECORD
+    ! FFT MAPS FROM CCP4 DIFFER FROM THEIR ASSIGNMENT OF COLUMNS/ROWS/SECTIONS
+    ! NORMALLY Z IS FASTEST, FOLLOWED BY X AND THEN Y
+    ! IN FSFOUR MAPS X IS NORMALLY FASTEST FOLLOWED BY Y AND Z
+    !
+    !
+    !       COMMON /MAPARM/ NC,NR,NS,NMODE,NCST,NRST,NSST,NX,NY,NZ,CELL,
+    !     *                 MAPC,MAPR,MAPS,NSB
+    !
+    COMMON /MAPIO/ INMAP, IOMAP, NHDRS, CCELL, NNSYM, NX, NY, NZ, &
+            AMN, AMX, AMEAN, ARMS, BUFI
+    DIMENSION CCELL(6), BUFI(20000000)
+
+    CHARACTER*80 FNAM, TIT
+    !
+    BYTE BUF(1024)
+    DIMENSION HDRBUF(256)
+    dimension CELL(6), DATA(256)
+    CHARACTER*1024 CBUF
+    CHARACTER*80 CLABL(10)
+    ! EQUIVALENCE TO INTERPRET THE HEADER
+    EQUIVALENCE (HDRBUF(1), NC), (HDRBUF(2), NR), (HDRBUF(3), NS)
+    EQUIVALENCE (HDRBUF(4), NMODE), (HDRBUF(5), NCST), (HDRBUF(6), NRST)
+    EQUIVALENCE (HDRBUF(7), NSST), (HDRBUF(8), NNX), (HDRBUF(9), NNY)
+    EQUIVALENCE (HDRBUF(10), NNZ), (HDRBUF(11), CELL(1))
+    EQUIVALENCE (HDRBUF(17), MAPC), (HDRBUF(18), MAPR), (HDRBUF(19), MAPS)
+    EQUIVALENCE (HDRBUF(20), AAMN), (HDRBUF(21), AAMX), &
+            (HDRBUF(22), AAMEAN)
+    EQUIVALENCE (HDRBUF(23), IISPG), (HDRBUF(24), NSB), (HDRBUF(25), LSKF)
+    EQUIVALENCE (HDRBUF(54), MACH)
+    EQUIVALENCE (HDRBUF(55), AARMS), (HDRBUF(56), NLABL)
+    EQUIVALENCE (HDRBUF(57), CLABL(1))
+    EQUIVALENCE (buf(1), dat1), (buf(5), dat2)
+    EQUIVALENCE (DATA(1), BUF(1))
+    !
+
+    !  READ THE BUFFER, CALCULATE THE LENGTH
+
+    OPEN(UNIT = 10, FILE = FNAM, ACCESS = 'DIRECT', &
+            FORM = 'UNFORMATTED', RECL = 1024)
+
+    read(10, rec = 1) HDRBUF
+
+    !  ASSIGN EQUIVALENCES TO COMMON VARIABLES
+    NX = NNX
+    NY = NNY
+    NZ = NNZ
+    ISPG = IISPG
+    AMN = AAMN
+    AMX = AAMX
+    AMIN = AMN
+    AMAX = AMX
+    AMEAN = AAMEAN
+    ARMS = AARMS
+    DO 100 I = 1, 6
+        CCELL(I) = CELL(I)
+    100   CONTINUE
+    WRITE(*, 400) NC, NR, NS, NMODE, NCST, NRST, NSST
+    WRITE(*, 500) NX, NY, NZ
+    WRITE(*, 600) CCELL
+    WRITE(*, 700) MAPC, MAPR, MAPS, ISPG, NSB, NLABL
+    DO 300 I = 1, NLABL
+        WRITE(*, 350) I, CLABL(I)
+    300   CONTINUE
+    350   FORMAT(' LABEL(', I1, '):', A)
+    WRITE(*, 800) AMN, AMX, AMEAN, ARMS, MACH
+
+    400   FORMAT(' NUMBER OF COLUMNS      : ', I10, /, &
+            ' NUMBER OF ROWS         : ', I10, /, &
+            ' NUMBER OF SECTIONS     : ', I10, /, &
+            ' MODE (O,1,2,3,4)       : ', I10, /, &
+            ' FIRST COLUMN IN MAP    : ', I10, /, &
+            ' FIRST ROW IN MAP       : ', I10, /, &
+            ' FIRST SECTION IN MAP   : ', I10)
+    500   FORMAT(' INTERVALS ALONG X      : ', I10, /, &
+            ' INTERVALS ALONG Y      : ', I10, /, &
+            ' INTERVALS ALONG Z      : ', I10)
+    600   FORMAT(' CELL DIMENSIONS ', /, &
+            ' A      : ', F10.3, /, &
+            ' B      : ', F10.3, /, &
+            ' C      : ', F10.3, /, &
+            ' ALPHA  : ', F10.3, /, &
+            ' BETA   : ', F10.3, /, &
+            ' GAMMA  : ', F10.3)
+    700   FORMAT(' AXIS CORRESPONDING TO COLUMNS  : ', I6, /, &
+            ' AXIS CORRESPONDING TO ROWS     : ', I6, /, &
+            ' AXIS CORRESPONDING TO SECTIONS : ', I6, /, &
+            ' SPACE GROUP NUMBER             : ', I6, /, &
+            ' BYTES USED TO STORE SYM-OPS    : ', I6, /, &
+            ' NUMBER OF LABELS USED          : ', I6)
+    800   FORMAT(' MINIMUM DENSITY IN MAP         : ', F12.6, /, &
+            ' MAXIMUM DENSITY IN MAP         : ', F12.6, /, &
+            ' AVERAGE (MEAN) DENSITY IN MAP  : ', F12.6, /, &
+            ' RMS DEVIATION FROM AVERAGE     : ', F12.6, /, &
+            ' MACHINE STAMP INT REPRESENT    : ', I12)
+
+    NNSYM = NSB / 80
+    NSW = NSB / 4
+    READ(10, REC = 2) CBUF(1:NSB)
+    WRITE(*, *) 'SYMMETRY OPERATORS: '
+    DO 1000 I = 1, NNSYM
+        WRITE(*, 900) CBUF(((I - 1) * 80 + 1):(80 * I))
+        900  FORMAT(' ', A)
+    1000  CONTINUE
+
+    IR = NC * NR * NS + 256 + NSW
+    NOR = INT(IR / 256)
+    NREST = MOD(IR, 1024)
+    WRITE(*, 1100) NOR, NREST, IR * 4, IR
+    1100  FORMAT(' NUMBER OF 256 WORD RECORDS INCL. HEADER: ', I10, /, &
+            ' + 1 PARTIALLY FILLED BY ', I4, ' WORDS', /, &
+            ' TOTAL BYTES ', I10, /, &
+            ' TOTAL WORDS ', I10)
+
+    NBYTE = IR * 4
+    NTOT = IR
+    NHDRS = 256 + NSW
+
+    WRITE(*, 1200) NBYTE, NTOT, NHDRS
+    1200  FORMAT(' ENTIRE FILE WILL BE READ === ', /, &
+            ' TOTAL BYTES         : ', I15, /, &
+            ' TOTAL WORDS         : ', I15, /, &
+            ' HEADER              : ', I15)
+
+    CLOSE(10)
+    ! TOTAL MAP: HEADER + SYMOP + MAPARRAY  WORDS
+    ! THIS IS REALLY CRAZY
+    OPEN(UNIT = 10, FILE = FNAM, ACCESS = 'direct', form = 'unformatted', recl = NBYTE)
+    READ(10, rec = 1) BUFI(1:NTOT)
+    CLOSE(10)
+
+END
+
+
+SUBROUTINE RDFSFOUR
+    ! READS FSFOUR MAP (INTEGER*4 MAP)
+    ! XTAL VIEW FSFOUR MAPS DO NOT CONTAIN SYMMETRY OPERATORS
+    ! READ MAPS FROM COMMON VARIABLE INMAP
+    ! E-DENSITY (FLOAT) IS FOUND IN BUFI
+
+    COMMON /MAPIO/ INMAP, IOMAP, NHDRS, CCELL, NNSYM, NX, NY, NZ, &
+            AMN, AMX, AMEAN, ARMS, BUFI
+    DIMENSION CCELL(6), BUFI(20000000)
+
+    DIMENSION IBUF(500)
+    DIMENSION TS(3, 24), IS(2, 3, 24)
+
+    READ (INMAP) TIT, NOSET, CCELL, NNSYM, NCENT, LATT, NPIC
+    ! IN MOST CASES NO SYM OPS ARE STORED IN FSFOUR MAP
+    ! BUT THE NUMBER OF SYM OPS
+    DO 100 I = 1, NNSYM
+        READ(INMAP) (TS(J, I), (IS(K, J, I), K = 1, 2), J = 1, 3)
+    100    CONTINUE
+    READ(INMAP) NX, NY, NZ, SCALE, NORN
+    ! INTERCHANGE NZ AND NY
+    IF (NORN.EQ.0) THEN
+        LENGTH = NX
+        NT = NY
+        NY = NZ
+        NZ = NT
+    ENDIF
+    IF (NORN.NE.0) THEN
+        STOP ' MAP FORMAT NOT SUPPORTED BY THIS PROGRAM '
+    ENDIF
+    NW = 0
+    J = 0
+    RMN = 1000.0
+    RMX = -1000.0
+    RMEAN = 0.0
+    SR = 0.0
+    200    READ(INMAP, END = 500) (IBUF(I), I = 1, LENGTH)
+    NW = NW + LENGTH
+    J = J + 1
+    ! STORE ENTIRE MAP IN BUFFER BUFI
+    ! CALCULATE MEAN AND DETERMINE EXTREMAS
+    DO 300 I = 1, LENGTH
+        RHO = FLOAT(IBUF(I))
+        IPS = (J - 1) * LENGTH
+        BUFI(IPS + I) = RHO
+        RMEAN = RMEAN + RHO
+        IF (RHO.LT.RMN) RMN = RHO
+        IF (RHO.GT.RMX) RMX = RHO
+    300      CONTINUE
+    GOTO 200
+    500    CONTINUE
+    AMN = RMN
+    AMX = RMX
+    AMEAN = RMEAN / NW
+    ! RUN AGAIN OVER THE MAP TO DETERMINE SIGMA (RMS)
+    DO 600 I = 1, NW
+        SR = (BUFI(I) - AMEAN)**2 + SR
+    600    CONTINUE
+    ! CALCULATE ROOT MEAN SQUARE
+    ARMS = SQRT(SR / NW)
+    WRITE(*, 800) NORN, NX, NY, NZ, NW, AMN, AMX, AMEAN, ARMS
+    800    FORMAT(' FSFOUR MAP FORMAT, MODE=', I1, ', ONLY SUPPORTED ', /, &
+            ' GRID POINTS NX,NY,NZ                : ', 3I8, /, &
+            ' NUMBER OF DATA POINTS READ          : ', I8, /, &
+            ' MIN, MAX, AVERAGE AND RMS RHO       : ', 4F8.3)
+    WRITE(*, 900) CCELL, NNSYM
+    900    FORMAT(' CELL CONSTANTS A B C ALFA BETA GAMMA: ', 6F8.2, /, &
+            ' NUMBER OF SYMMETRY OPERATORS        : ', I8)
+    RETURN
+END
+
+
+SUBROUTINE SCALMAP(RHOC, RHOO, NM)
+    ! SCALE MAP TO ORIGINAL VALUE
+    ! DETERMINE SCALE FROM 2 SIGMA FEATURES WITHIN SPHERE
+    !
+    ! FILL ARRAY BUFI
+
+    COMMON /MAPIO/ INMAP, IOMAP, NHDRS, CCELL, NNSYM, NX, NY, NZ, &
+            AMN, AMX, AMEAN, ARMS, BUFI
+    DIMENSION CCELL(6), BUFI(20000000)
+
+    COMMON /CORRECT/ CORRF(50), RLASER(50)
+
+    DIMENSION RHOO(1), RHOC(1)
+
+    ! OPEN AND CLOSE MAP BEFORE CALLING SCALMAP
+    WRITE(*, *)
+
+    AMEAN = 0.0
+    SMSQ = 0.0
+    DRMIN = 0.0
+    DRMAX = 0.0
+    SSN = 0.0
+    SS = 0.0
+    RRN = 0.0
+    RR = 0.0
+    DO 900 I = 1, NM
+        AMEAN = RHOO(I) + AMEAN
+    900    CONTINUE
+    AMEAN = AMEAN / NM
+    DO 1200 I = 1, NM
+        SMSQ = SMSQ + (RHOO(I) - AMEAN)**2
+    1200    CONTINUE
+    SM = SQRT(SMSQ / NM)
+
+
+    ! SCALE POSITIVE AND NEGATIVE SEPARATELY
+    DO 1400 I = 1, NM
+        IF (RHOO(I).LT.0.0) THEN
+            SSN = SSN + RHOO(I)
+            RRN = RRN + RHOC(I)
+        ELSE
+            SS = SS + RHOO(I)
+            RR = RR + RHOC(I)
+        ENDIF
+    1400   CONTINUE
+    SCALP = RR / SS
+    SCALN = RRN / SSN
+
+    DO 1700 I = 1, NM
+        IF (RHOO(I).LT.0.0) RHOO(I) = RHOO(I) * SCALN
+        IF (RHOO(I).GT.0.0) RHOO(I) = RHOO(I) * SCALP
+        IF (RHOO(I).GT.DRMAX) DRMAX = RHOO(I)
+        IF (RHOO(I).LT.DRMIN) DRMIN = RHOO(I)
+    1700   CONTINUE
+    ! COPY SM INTO ARMS
+    ARMS = SM
+    WRITE(*, *)
+    WRITE(*, *) 'SYNTHETIC MAP HAS BEEN SCALED TO ORIGINAL MAP: '
+    WRITE(*, 1900) ITP, DRMIN, DRMAX, AMEAN, SM, SCALP, SCALN
+    1900    FORMAT(' MAP FOR TIME POINT           :  ', I10, /, &
+            ' MIN  VALUE                   :  ', F10.3, /, &
+            ' MAX  VALUE                   :  ', F10.3, /, &
+            ' MEAN VALUE                   :  ', F10.3, /, &
+            ' STANDARD DEVIATION FROM MEAN :  ', F10.4, /, &
+            ' SCALE FACTOR FOR POSITIVE    :  ', F10.6, /, &
+            ' SCALE FACTOR FOR NEGATIVE    :  ', F10.6)
+    WRITE(*, *)
+
+    RETURN
+END
+
+
+SUBROUTINE SETMAT(CELL)
+    !
+    COMMON /MATRIX/  MAT11, MAT12, MAT13, MAT22, MAT23, MAT33, &
+            IMAT11, IMAT12, IMAT13, IMAT22, IMAT23, IMAT33
+    REAL*4  MAT11, MAT12, MAT13, MAT22, MAT23, MAT33
+    REAL*4  IMAT11, IMAT12, IMAT13, IMAT22, IMAT23, IMAT33
+    !
+    COMMON /METRIC/ G11, G12, G13, G22, G23, G33
+    DIMENSION CELL(6)
+
+
+    ! VARIABLES
+    DIMENSION CABG(3), SABG(3)
+
+
+    ! SET UP ORTHOGONALIZATION MATRIX AND INVERSE
+    ! D=PI/180
+    D = 0.017453
+    ! SET UP MATRIX, INVERSE MATRIX, METRIC TENSOR
+    DO 900 I = 1, 3
+        CABG(I) = COS(CELL(I + 3) * D)
+        SABG(I) = SIN(CELL(I + 3) * D)
+        IF (CELL(I + 3).EQ.90.0) THEN
+            CABG(I) = 0.
+            SABG(I) = 1.
+        ENDIF
+    900   CONTINUE
+    CABGS = (CABG(2) * CABG(3) - CABG(1)) / (SABG(2) * SABG(3))
+    SABGS = SQRT(1.0 - CABGS * CABGS)
+    MAT11 = CELL(1)
+    MAT12 = CELL(2) * CABG(3)
+    MAT13 = CELL(3) * CABG(2)
+    MAT22 = CELL(2) * SABG(3)
+    MAT23 = -CELL(3) * SABG(2) * CABGS
+    MAT33 = CELL(3) * SABG(2) * SABGS
+    ! SET UP INVERSE MATRIX
+    IMAT11 = 1 / MAT11
+    IMAT12 = -MAT12 / (MAT11 * MAT22)
+    IMAT13 = (MAT12 * MAT23 - MAT13 * MAT22) / (MAT11 * MAT22 * MAT33)
+    IMAT22 = 1 / MAT22
+    IMAT23 = - MAT23 / (MAT22 * MAT33)
+    IMAT33 = 1 / MAT33
+    ! SET UP METRIC TENSOR
+    G11 = MAT11 * MAT11
+    G12 = 2 * MAT11 * MAT12
+    G13 = 2 * MAT11 * MAT13
+    G22 = MAT12 * MAT12 + MAT22 * MAT22
+    G23 = 2 * MAT12 * MAT13 + 2 * MAT22 * MAT23
+    G33 = MAT13 * MAT13 + MAT23 * MAT23 + MAT33 * MAT33
+    WRITE(*, *) ' ----------------------------------- '
+    WRITE(*, *) 'ORTHOGONALIZATION MATRIX '
+    WRITE(*, 920) MAT11, MAT12, MAT13
+    WRITE(*, 920) 0.0, MAT22, MAT23
+    WRITE(*, 920) 0.0, 0.0, MAT33
+    920   FORMAT(3F10.5)
+    WRITE(*, *) 'INVERSE OF ORTHOGONALIZATION MATRIX '
+    WRITE(*, 920) IMAT11, IMAT12, IMAT13
+    WRITE(*, 920) 0.0, IMAT22, IMAT23
+    WRITE(*, 920) 0.0, 0.0, IMAT33
+    WRITE(*, *) ' ----------------------------------- '
+    RETURN
+END
+
+
+FUNCTION MATSYM(S, TEXT, ICOL)
+    !
+    ! A FORTRAN FUNCTION SUBPROGRAM TO SCAN A SYMMETRY CARD AND BUILD
+    ! THE CORRESPONDING SYMMETRY-OPERATION MATRIX.  THE CONTENTS OF THE
+    ! CARD AND ERRORS ENCOUNTERED ARE WRITTEN OFF-LINE IN THE CALLING
+    ! PROGRAM.  THE FUNCTIONAL VALUE IS NORMALLY ZERO, WHEN AN ERROR HAS
+    ! BEEN DETECTED THE NUMBERS 1-4 ARE GIVEN BACK:
+    ! ERROR-NUMBER 1:  INVALID CHARACTER AT POSITION ....
+    !              2:  SYNTAX ERROR AT NONBLANK POSITION ....
+    !              3:  BAD COMMAS
+    !              4:  DETERMINANT OF ROTATION MATRIX NOT +1 OR -1
+    !
+    ! EXPLANATION OF ARGUMENTS
+    ! S IS THE 1ST ELEMENT OF THE 3X4 ARRAY WHERE THE SYM. OP. IS TO BE
+    ! STORED.
+    ! TEXT  IS THE ARRAY OF THE TEXTRECORD WHICH IS TO BE SCANNED  (LENGTH:
+    ! 36 CHARACTERS, CONTIGUOUSLY)
+    ! ICOL POINTS - IN CASE OF ERRORS - TO THE POSITION OF AN INVALID
+    ! CHARACTER OR AN SYNTAX ERROR WITHIN THE SYMMETRY CARD
+    !
+    !     MODIFIED FOR PDP-11 06/JAN/78 S.J. REMINGTON
+    ! ***** LAST UPDATE 07/10/76   MRS                WRS:PR2.MATSYM
+    ! ***** PREVIOUS UPDATES                              07/07/75  06/11/72
+    !
+    !
+    DIMENSION S(3, 4), NCHAR(36)
+    !      LOGICAL*1 TEXT(36),LHELP(4)
+    CHARACTER*1 TEXT(36)
+    ! CTEXT(36) unnoetig
+    CHARACTER*1 BCHAR, VALID(14), BLANK
+    EQUIVALENCE (BLANK, VALID(14))
+    !      EQUIVALENCE (IHELP,LHELP(1))
+    SAVE
+    DATA VALID/'1', '2', '3', '4', '5', '6', 'X', 'Y', 'Z', '-', '+', '/', ',', &
+            ' '/
+    !      DATA LHELP /4*Z'00'/
+    !     DATA VALID/ZF1,ZF2,ZF3,ZF4,ZF5,ZF6,ZE7,ZE8,ZE9,Z60,Z4E,Z61,Z6B,
+    !    * Z20/
+    !
+    !
+    ! ==== unnoetig ==
+    !     KONVERSION LOGICAL IN CHARACTER
+    !
+    !      DO 1 I=1,36
+    !      LHELP(4)=TEXT(I)
+    ! 1    CTEXT(I)=CHAR(IHELP)
+    !
+    ! =====
+    !----INITIALIZE SIGNALS
+    ICOL = 0
+    IFIELD = 0
+    !----CLEAR SYMOP ARRAY
+    DO 4 J = 1, 4
+        DO 4 I = 1, 3
+        4    S(I, J) = 0.0
+    !
+    !----TEST THE SYMMETRY TEXT (TEXT) FOR ILLEGAL CHARACTERS
+    !
+    !      THE STATEMENT IS SCANNED AND ARRAY NCHAR IS FILLED WITH THE INDICES
+    !      OF EACH ELEMENT OF TEXT INTO THE ARRAY 'VALID' (I.E. IF THE SEVENTH
+    !      CHAR OF 'TEXT' -IGNORING BLANKS- IS 'Y', NCHAR(7)=8)
+    !
+    ICOLMX = 0
+    DO 20 I = 1, 36
+        ! MAR      BCHAR = CTEXT(I)
+        BCHAR = TEXT(I)
+        IF(BCHAR .EQ. BLANK) GO TO 20
+        ICOLMX = ICOLMX + 1
+        DO 10 J = 1, 13
+            IF(VALID(J) .NE. BCHAR) GO TO 10
+            NCHAR(ICOLMX) = J
+            GO TO 20
+        10 CONTINUE
+        !--IF GOT TO HERE, THE CHAR ISN'T IN 'VALID'
+        JTXTSC = I
+        GO TO 9975
+    20 CONTINUE
+    !
+    !----BEGIN FIELD LOOP
+    !
+    101  IFIELD = IFIELD + 1
+    IF(IFIELD - 3) 104, 104, 103
+    !  HAVE ALL CHARACTERS  BEEN ANALYSED IN 3 FIELDS?
+    103  IF(ICOL - ICOLMX) 9987, 1000, 1000
+    !---NO MORE THAN THREE FIELDS PERMITTED
+    104  SIGN = 1.0
+    ICOL = ICOL + 1
+    !----MARCH ON, FIND WHATS NEXT
+    IFNUM = NCHAR(ICOL)
+    IF (11 - IFNUM) 9980, 110, 110
+    !----TEST FOR SIGNS
+    110  IF (10 - IFNUM) 118, 115, 112
+    !----TEST TO DISTINGUTSH BETWEEN NUMBERS AND LETTERS
+    112  IF (6 - IFNUM) 125, 130, 130
+    !----FOUND A SIGN
+    !     COME HERE FOR MINUS
+    115  SIGN = -1.0
+    !     COME HERE FOR PLUS
+    118  ICOL = ICOL + 1
+    !----NEXT CHARACTER MUST BE A NUMBER OR LETTER
+    IFNUM = NCHAR(ICOL)
+    IF (IFNUM - 9) 122, 122, 9980
+    122  IF (IFNUM - 6) 130, 130, 125
+    !----A LETTER
+    125  IFNUM = IFNUM - 6
+    S(IFIELD, IFNUM) = SIGN
+    GO TO 150
+    !----A NUMBER, FLOAT IT INTO DIGIT
+    130  DIGIT = IFNUM
+    ICOL = ICOL + 1
+    !----IS NEXT CHARACTER A SLASH
+    IF(NCHAR(ICOL).EQ.12)  GO TO 135
+    !----NO SLASH, TRANSLATION TERM COMPLETE
+    ICOL = ICOL - 1
+    GO TO  140
+    !----A SLASH IS NEXT, IS THERE A NUMBER AFTER IT
+    135  ICOL = ICOL + 1
+    IFNUM = NCHAR(ICOL)
+    IF (IFNUM - 6) 138, 138, 9980
+    !----MAKE FRACTION;   '5' NOT ALLOWED IN DENOMINATOR
+    138 IF(IFNUM.EQ.5) GO TO 9980
+    DIGIT = DIGIT / FLOAT(IFNUM)
+    !----ACCUMULATE THE VECTOR COMPONENT
+    140  S(IFIELD, 4) = S(IFIELD, 4) + SIGN * DIGIT
+    !----TEST TO SEE IF THERE ARE MORE CHARACTERS IN THIS SUBFIELD
+    !    OR A NEW SUBFIELD
+    150  ICOL = ICOL + 1
+    SIGN = 1.0
+    !----TEST IF ALL DONE
+    IF(ICOL - ICOLMX) 151, 151, 1000
+    151  CONTINUE
+    !----A SUBFIELD BEGINS WITH A PLUS OR MINUS
+    IF(NCHAR(ICOL).EQ.11)  GO TO 118
+    IF(NCHAR(ICOL).EQ.10)  GO TO 115
+    !----A COMMA MUST BE NEXT UNLESS ICOL IS ICOLMX+1 WHICH MEANS THE END
+    IF(NCHAR(ICOL).EQ.13)   GO TO 101
+    163  IF (ICOLMX + 1 - ICOL) 9980, 1000, 9980
+    !----EVERYTHING SEEMS OK SEE IF DETERMINATE IS A NICE + OR - 1.
+    1000 CONTINUE
+    D = S(1, 1) * S(2, 2) * S(3, 3)&
+            - S(1, 2) * S(2, 1) * S(3, 3)&
+            - S(1, 1) * S(2, 3) * S(3, 2)&
+            - S(1, 3) * S(2, 2) * S(3, 1)&
+            + S(1, 2) * S(2, 3) * S(3, 1)&
+            + S(1, 3) * S(2, 1) * S(3, 2)
+    IF(ABS(ABS(D) - 1.0) - .0001) 1001, 9985, 9985
+    1001 CONTINUE
+    IF(IFIELD - 3) 9987, 1002, 9987
+    1002 CONTINUE
+    !----LEGAL RETURN
+    MATSYM = 0
+    2005 RETURN
+    !
+    !
+    !----ILLEGAL CHARACTER ON SYMMETRY CARD
+    9975 MATSYM = 1
+    ICOL = JTXTSC
+    GO TO 2005
+    !
+    !----SYNTAX ERROR AT NONBLANK CHARACTER ICOL
+    9980 MATSYM = 2
+    GO TO 2005
+    !
+    !----DETERMINANT IS NOT + OR - 1.
+    9985 MATSYM = 4
+    GO TO 2005
+    !
+    !----INCORRECT NUMBER OF COMMAS
+    9987 MATSYM = 3
+    GO TO 2005
+END

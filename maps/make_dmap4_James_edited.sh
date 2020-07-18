@@ -11,8 +11,8 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 
 phasmin=12.0
-#SYMM=" 19"
-SYMM=" 154"
+SYMM=" 19"
+#SYMM=" 154"
 
 if [  "X$#" == "X7" ] ; then
 	dark_model=$1 # pdb file
