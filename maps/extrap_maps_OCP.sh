@@ -6,14 +6,16 @@ SYMM=" 154"
 bin_nam="Light"
 
 if [  "X$#" == "X3" ] ; then
-	cell=$1
+	dark_model=$1
+	cell=$(${loc}/pdb_cell.sh $dark_model)
 	res_high=$2
 	res_low=$3
 else
-	echo "Usage: extrap_maps <cell> <res_high> <res_low> (should be used after map_dmap... has been run)"
+	echo "Usage: extrap_maps <pdb> <res_high> <res_low> (should be used after map_dmap... has been run) MAKE SURE TO UPDATE SYM AT THE TOP OF THIS SCRIPT!"
 	exit 1
 fi
 
+if [ ! -f $dark_model ]; then echo "$dark_model not found!" && exit 1 ; fi
 rm -f neg_add.dat add.dat
 
 added=1
