@@ -42,7 +42,7 @@ end_weight
   fft HKLIN marius_ext.mtz MAPOUT neg_map.map  >log << END-wfft
   RESO $res_low $res_high
   SCALE F1 1.0 0.0
-  GRID 160 160 140
+  #GRID 160 160 140
   BINMAPOUT
   LABI F1=Fext SIG1=sigF PHI=PHI
 END-wfft
@@ -91,9 +91,9 @@ end_weight
 fft HKLIN Extrapolated${Next1}.mtz MAPOUT Extrapolated${Next1}.map  >log << END-wfft
 RESO $res_low $res_high
 SCALE F1 1.0 0.0
-GRID 160 160 140
+#GRID 160 160 140
 BINMAPOUT
 LABI F1=Fext SIG1=sigF PHI=PHI
 END-wfft
 
-rm -f neg_*.map neg_*.log neg_*.mtz Fext_QW_SCALEIT_*.map Fext_QW_SCALEIT_*.mtz
+#rm -f neg_*.map neg_*.log neg_*.mtz Fext_QW_SCALEIT_*.map Fext_QW_SCALEIT_*.mtz

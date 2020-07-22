@@ -3,11 +3,32 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 # Need to choose somewhere for sphere...
 obs_map="./neg_map.map"
-xc=-22.0
-yc=11.0
-zc=-3.0
+# Centreed on water:
+#xc=-22.0
+#yc=11.0
+#zc=-3.0
 
-radius=5 #4 #8.0
+#Centreted on N term caratanoid:
+#xc=-20.0
+#yc=19.0
+#zc=10.0
+
+# Edge of carat (close to MET117)
+#13.69
+#xc=-19.3
+#yc=22.0
+#zc=13.6
+
+#Close to MET202
+xc=-18.64
+yc=0.162
+zc=-13.61
+
+#xc=
+#yc=
+#zc=
+
+radius=8.0 #4 #8.0
 sigma=2  # 2 #2 #1.5
 out_map=mask_1.map
 

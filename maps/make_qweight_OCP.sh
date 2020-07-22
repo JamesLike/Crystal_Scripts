@@ -91,15 +91,43 @@ f2mtz HKLIN model_phs.hkl HKLOUT FC_dark.mtz << f2m_phs
 f2m_phs
 
 ######################################
+# Get labels correct
+######################################
+if mtzinfo $dark_obs | head -n 5 | grep ' F '; then
+    echo 'Setting darkobs label as F'
+    F1='F'
+    SIGF1='SIGF'
+elif mtzinfo $dark_obs | head -n 5 | grep ' FP '; then
+    echo'Setting darkobs label as F'
+    F1='FP'
+    SIGF1='SIGFP'
+else
+    echo 'Check dark labels!'
+    exit 1
+fi
+
+if mtzinfo $light_obs | head -n 5 | grep ' F '; then
+    echo 'Setting light obs label as F'
+    F2='F'
+    SIGF2='SIGF'
+elif mtzinfo $light_obs | head -n 5 | grep ' FP '; then
+    echo'Setting darkobs label as F'
+    F2='FP'
+    SIGF2='SIGFP'
+else
+    echo 'Check light labels!'
+    exit 1
+fi
+######################################
 # cad things together
 ######################################
 cad HKLIN1 FC_dark.mtz HKLIN2 $dark_obs HKLIN3 $light_obs HKLOUT all.mtz << END-cad
 	LABIN FILE 1 E1=FC_D E2=SIG_FC_D E3=PHI_D
 	CTYP  FILE 1 E1=F E2=Q E3=P
-	LABIN FILE 2 E1=FP E2=SIGFP
+	LABIN FILE 2 E1=$F1 E2=$SIGF1
 	CTYP  FILE 2 E1=F E2=Q
 	LABO FILE 2 E1=F_Dark E2=SIGF_Dark
-	LABIN FILE 3 E1=F E2=SIGF
+	LABIN FILE 3 E1=$F2 E2=$SIGF2
 	LABO FILE 3 E1=F_${bin_nam} E2=SIGF_${bin_nam}
 	CTYP  FILE 3 E1=F E2=Q
 	END
@@ -132,7 +160,7 @@ scaleit HKLIN all_sc1.mtz HKLOUT all_sc2.mtz << END-scaleit2
 	REFINE ANISOTROPIC
 	EXCLUDE FP SIG 4 FMAX 10000000
 	LABIN FP=F_Dark SIGFP=SIGF_Dark FPH1=F_${bin_nam} SIGFPH1=SIGF_${bin_nam}
-	CONV ABS 0.0001 TOLR  0.000000001 NCYC 40
+        CONV ABS 0.0001 TOLR  0.000000001 NCYC 150
 	END
 END-scaleit2
 ######################################
@@ -212,7 +240,7 @@ end_weight
 ######################################
 fft HKLIN ${bin_nam}_dwt.mtz MAPOUT ${bin_nam}_wd.map << END-wfft
 	RESO $res_low  $map_high
-	GRID 200 200 120
+	#GRID 200 200 120
 	BINMAPOUT
 	LABI F1=DOBS_${bin_nam} W=FOM_${bin_nam} PHI=PHI
 END-wfft
