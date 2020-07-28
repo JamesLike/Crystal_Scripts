@@ -16,13 +16,14 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #dark_FC="/mnt/data4/serial/2019_05_p14/processing/q_weighted/q_weighted_EXT_New_FC_2/dark_single.mtz" 
 #dark_obs="/mnt/data4/serial/2019_05_p14/processing/q_weighted/00_phenix_massage_RES_CUT.mtz" 
 
-dark_obs="/mnt/data11/LR23_part/store/AllRuns-mosflm_total_dark.hkl"
-dark_model="/mnt/data11/LR23_part/store/Dark.pdb"
+#dark_obs="/mnt/data11/LR23_part/store/AllRuns-mosflm_total_dark.hkl"
+#dark_model="/mnt/data11/LR23_part/store/Dark.pdb"
 
 #dark_obs="/home/james/Desktop/tmptmptmp/AllRuns-mosflm_total_dark.hkl"
 #dark_model="/home/james/Desktop/tmptmptmp/Dark.pdb"
 
-
+dark_obs="/home/james/data/crystallography/SACLA_2017B/laser_OFF_all.hkl"
+dark_model=" /home/james/data/crystallography/SACLA_2017B/DARK-SACLA-2017B.pdb "
 trunc_type="_phenix_massage.mtz"
 #trunc_type="_new_truncate.mtz"
 
@@ -125,14 +126,15 @@ do
   ######################################
   ${loc}/trunc_all_options.sh $f $res_high $res_low "$cell" || exit
   ${loc}/map_generate.sh $dark_model $dark_FC $dark_OBS ./${name}${trunc_type} $name $res_high $res_low "$cell" >> map.log || exit
-  ${loc}/own_scales/make_phenix_q_weight.sh $dark_model $dark_FC $dark_OBS ./${name}${trunc_type} "$cell" $res_high $res_low|| exit
+  #${loc}/own_scales/make_phenix_q_weight.sh $dark_model $dark_FC $dark_OBS ./${name}${trunc_type} "$cell" $res_high $res_low|| exit
   ${loc}/extrap_maps_marius.sh "$cell" $res_high $res_low || exit
 
   ######################################
   ## Clean up is the clean option is y
   ######################################
   if [ "$clean" == "yes" ] ; then
-   rm Fext_QW_SCALEIT*.mtz Fext_QW_SCALEIT*.map Fext_QW_Phenix_Multiscale_* Fext_unw_Phenix_Multiscale_*
+   #rm Fext_QW_SCALEIT*.mtz
+   rm Fext_QW_SCALEIT*.map Fext_QW_Phenix_Multiscale_* Fext_unw_Phenix_Multiscale_*
   fi
 
   ######################################

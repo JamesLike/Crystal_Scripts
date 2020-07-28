@@ -3,8 +3,8 @@ load map_mol.ccp4
 unset normalize_ccp4_maps
 map_double map_mol, -1
 hide all
-isomesh neg, map_mol, -3.4, all, carve=2
-isomesh pos, map_mol, 3.4, all, carve=2
+isomesh neg, map_mol, -3, all, carve=2
+isomesh pos, map_mol, 3, all, carve=2
 color magenta, neg
 color marine, pos
 util.cbay
