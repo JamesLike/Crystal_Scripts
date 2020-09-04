@@ -123,8 +123,10 @@ T3_CC5=$(grep 'CC\$' $TABLE3 | awk '{print $2,$3}')"c"
 
 name=$(basename $HKL_ROOT -tagsonly.hkl | sed -e "s/AllRuns-mosflm_fs-//g")
 TABLE0="${name}.table"
+images=$( grep $name /home/james/data/crystallography/LCLS_LR23/old_crystfel_proc_hkl/LCLS_logs/results-tags.txt | awk -F ':' '{print $2}')
 
 echo -e "Name:                          \t $name"   >$TABLE0
+echo -e "Indexed Patterns:               \t $images" >>$TABLE0
 echo -e "Resolution Limits \AA:         \t $T1_RES" >>$TABLE0
 echo -e "                               \t $T2_RES" >>$TABLE0
 echo -e "                               \t $T3_RES" >>$TABLE0

@@ -97,19 +97,8 @@ hcc=$(tail $FILENAME_OUT -n 1 | awk '{printf "%0.2f", $7}')
 
 
 
-echo -e "Resolution Limits \AA:         \t ${RES_LIMS} (${H_RES_LIMS})"           >$TABLE1
-echo -e "Merged Crystals:               \t $Number_images "                       >>$TABLE1
-echo -e "No. Unique reflection Indicies:\t $SUM_POSSIBLE "                        >>$TABLE1
-echo -e "No. Merged   Reflections:      \t $NUM_TOTAL_MEAS (${hmeasured})"        >>$TABLE1
-echo -e "Completeness (%):              \t $OVERALL_COMPLETENESS (${hcomple})"    >>$TABLE1
-echo -e "Signal to noise:               \t $sigtonoise (${hsnr})"                 >>$TABLE1
-echo -e "Wilson b factor:               \t $wilsonb"                              >>$TABLE1
-echo -e "R\$_{Split}\$ (%):             \t $rsplit (${hrsplit})"                  >>$TABLE1
-echo -e "CC*                            \t $ccstar (${hccstar})"                  >>$TABLE1
-echo -e "CC\$_{1/2}\$                   \t $cc (${hcc})"                          >>$TABLE1
 
 
 cp $FILENAME_OUT "Stats_summary.log"
 echo "-Done"
 rm $TEMP_RSPLIT $TEMP_CC $TEMP_RES $TEMP_SNR
-
