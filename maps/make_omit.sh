@@ -59,7 +59,7 @@ echo "extending map.."
 ###################################################################
 #  Extend the difference map to cover the molecule + 4 Ang
 ###################################################################
-
+# Map Mask should creat / edit the map for pymol to view
 mapmask mapin ${map} mapout ${map_mol}  \
    xyzin ${coords} >>log <<eof-mapmask
 	border 4
