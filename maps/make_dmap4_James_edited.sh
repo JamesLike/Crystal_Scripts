@@ -184,7 +184,7 @@ end_weight
 ######################################
 fft HKLIN ${bin_nam}_dwt.mtz MAPOUT ${bin_nam}_wd.map << END-wfft
 	RESO $res_low  $map_high 
-	#GRID 200 200 120
+	GRID 200 200 120
 	BINMAPOUT
 	LABI F1=DOBS_${bin_nam} W=FOM_${bin_nam} PHI=PHI
 END-wfft

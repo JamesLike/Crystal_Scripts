@@ -1,5 +1,5 @@
 #!/bin/bash
-directory=$(pwd)
+directory="/dls/x05-1/data/2020/mx15722-24/processing/cheetah_proc/cheetah/hdf5/"
 
 #for filename in $directory/* ; do
 #	echo 'Processing.. ' $filename
@@ -17,7 +17,8 @@ directory=$(pwd)
 #	cd ..
 #done
 
-for filename in $directory/*.hkl ; do
-	echo 'Processing.. ' $filename
-	../merge_kiiro_stats_prep.sh $filename 1.45
+for filename in ${directory}*v3* ; do
+	echo 'Processing.. ' "$filename"
+	base=(basenme $filename)
+	/dls/x05-1/data/2020/mx15722-24/processing/crystfel_proc/jvt_run_1.sh "$filename"
 done

@@ -1,0 +1,28 @@
+#!/bin/bash
+directory="/dls/x05-1/data/2020/mx15722-24/processing/cheetah_proc/cheetah/hdf5"
+process_script="/dls/x05-1/data/2020/mx15722-24/processing/crystfel_proc/jvt_run_g.sh"
+#if [ "X$#" == "X1" ] ; then
+#        process_script=$(realpath "$1")
+#        #IMAGE_PATH="$2"
+#	      #GEOM="$3"
+#else
+        echo "Usage: path of the jvt_runs script"
+        exit 1
+fi
+
+echo "$process_script"
+
+if [ ! -d $directory ]; then echo "$geom_output not found!" && exit 1 ; fi
+if [ ! -f $process_script ]; then echo "$geom_output not found!" && exit 1 ; fi
+
+echo "Processing date here: " $directory
+echo "With this script: " $process_script
+i = 130
+while [ $i -le 149 ]
+do
+	base=$i
+	echo 'Processing.. ' $filename
+	echo '--Basename.. ' $base
+	qsub -l redhat_release=rhel7 -l m_mem_free=3G -cwd -pe smp 20 -q low.q $process_script $base
+	i=$(($i+1))
+done

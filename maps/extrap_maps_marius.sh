@@ -17,7 +17,7 @@ fi
 rm -f neg_add.dat add.dat
 
 added=1
-while [ $added -le 300 ]
+while [ $added -le 400 ]
 do
 	add=$(echo "scale=2; $added/10" | bc -l)
 	echo "Processing " $add
@@ -40,7 +40,7 @@ end_weight
   fft HKLIN marius_ext.mtz MAPOUT neg_map.map  >log << END-wfft
   RESO $res_low $res_high
   SCALE F1 1.0 0.0
-  GRID 160 160 140
+  #GRID 160 160 140
   BINMAPOUT
   LABI F1=Fext SIG1=sigF PHI=PHI
 END-wfft

@@ -22,8 +22,8 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #dark_obs="/home/james/Desktop/tmptmptmp/AllRuns-mosflm_total_dark.hkl"
 #dark_model="/home/james/Desktop/tmptmptmp/Dark.pdb"
 
-dark_obs="/home/james/data/crystallography/SACLA_2017B/laser_OFF_all.hkl"
-dark_model=" /home/james/data/crystallography/SACLA_2017B/DARK-SACLA-2017B.pdb "
+dark_obs="/home/james/data/crystallography/2020_PAL/final_merge/neg1ps.hkl"
+dark_model="/home/james/data/crystallography/2020_PAL/trans_PAL.pdb"
 trunc_type="_phenix_massage.mtz"
 #trunc_type="_new_truncate.mtz"
 
@@ -53,13 +53,15 @@ pymolfig () {
 	pymol -c ./py_tmp.pml
 	png_name=$(echo $1 | sed -e 's/\.map$//')
 	mv png.png ${png_name}.png
+	mv png1.png ${png_name}1.png
+	mv png2.png ${png_name}2.png
 	rm -f map_mol.ccp4
 }
 
 makefigs () {
 	move $1
-	pymolfig $1_James_QW.map
-	pymolfig $1_nonw.map
+	#pymolfig $1_James_QW.map
+	#pymolfig $1_nonw.map
 	pymolfig $1_wdex.map
 	pymolfig $1_phenix_multiscale_1.ccp4
 }
@@ -170,6 +172,10 @@ do
     rm -f all_Fs.hkl all.mtz Fext_map.dat Fext_map.hkl fmodel fobs_dark fobs_light Fxt_map_9.map James_ext.mtz LFs_tmp1  light_Fs light_Fs_scaled light_Fs_scaled.hkl light.hkl neg_9.log  neg.inp neg_int.dat phenix_Fobs_Fobs.mtz tmp_dark_1 tmp_dark_12a tmp_dark_1a tmp_dark_2 tmp_dark_2a tmp_dark_phase_1  tmp_dark_phase_12a tmp_dark_phase_1a  tmp_dark_phase_2 tmp_dark_phase_2a tmp_light_1  tmp_light_12a tmp_light_1a tmp_light_2 tmp_light_2a weighted_map_log
     rm -f dark_Fs dark_Fs_scaled dark_Fs_scaled.hkl dark.hkl  dark_phases dark_phases.hkl dark_phases_sorted.hkl dFC_DFs_LFs_tmp1 dFC_DFs_LFs_tmp2 dFC_DFs_tmp1  dFC_tmp1 DFs_tmp1 diff_unweighted_map.dat diff_unweighted_map.hkl diff_unweighted_map.map diff_unweighted_map.mtz diff_weight_map.dat diff_weight_map.hkl diff_weight_map.mtz map_mol.ccp4 py_tmp.pml neg_*.log
     rm -f add.dat COUNT.dat darkFC_extrap* FIT_C.dat neg_add.dat
+    rm *Fext*
   fi
+
 done
+
+
 
