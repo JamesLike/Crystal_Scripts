@@ -12,7 +12,7 @@ xc=-3.66
 yc=6.86
 zc=-19.88
 
-radius=5 #4 #8.0
+radius=7 #4 #8.0
 sigma=2  # 2 #2 #1.5
 out_map=mask_1.map
 

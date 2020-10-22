@@ -2,7 +2,7 @@
 loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
-
+SYMM=" 19"
 if [  "X$#" == "X2" ] ; then
 	cell=$1
 	add=$2

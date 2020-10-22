@@ -26,7 +26,7 @@ do
 	echo dark_phase.hkl >  add.inp # Dark phases on an absolute scale hkl F sig F phase
 	echo ${bin_nam}_dark.phs >> add.inp # Q weighted time-point map: hkl deltF FOM PHI
 	echo light_scaled.hkl >> add.inp #  Light scaled structure factors hkl F sigF
-	echo darkFC_extrap.hkl >> add.inp
+	echo darkFC_extrap.hkl >> add.inp # Name of the outpufr form Marius' script (fc+fwv3)
 	echo darkFC_extrap.phs >> add.inp
 	echo ${add} >> add.inp
 	${loc}/progs/fc+fwv3 < add.inp

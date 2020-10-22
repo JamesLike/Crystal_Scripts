@@ -2,7 +2,7 @@
 loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #J Baxter 2020
 if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
-SYMM=" 19"
+SYMM="19"
 bin_nam="Light"
 
 if [  "X$#" == "X3" ] ; then
@@ -49,7 +49,7 @@ END-wfft
 	echo $add >> add.dat
   mv marius_ext.mtz Fext_QW_SCALEIT_${added}.mtz
   mv neg_map.map Fext_QW_SCALEIT_${added}.map
-  added=$(( $added + 5))
+  added=$(( $added + 10))
 done
 
 ######################################

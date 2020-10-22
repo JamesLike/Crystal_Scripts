@@ -22,8 +22,9 @@ loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 #dark_obs="/home/james/Desktop/tmptmptmp/AllRuns-mosflm_total_dark.hkl"
 #dark_model="/home/james/Desktop/tmptmptmp/Dark.pdb"
 
-dark_obs="/home/james/data/crystallography/2020_PAL/final_merge/neg1ps.hkl"
-dark_model="/home/james/data/crystallography/2020_PAL/trans_PAL.pdb"
+#dark_obs="/home/james/data/crystallography/2020_PAL/hkls/neg-1ps-laser-on.hkl"
+dark_obs="/home/james/Desktop/upload/5_Valid-Maps/day-21-1ps-CHECK-laser-off.hkl"
+dark_model="/home/james/data/crystallography/2020_PAL/trans_PAL_refined.pdb"
 trunc_type="_phenix_massage.mtz"
 #trunc_type="_new_truncate.mtz"
 
