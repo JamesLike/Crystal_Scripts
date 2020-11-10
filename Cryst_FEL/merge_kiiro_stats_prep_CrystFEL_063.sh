@@ -5,7 +5,7 @@ if [ "X$#" == "X1" ]; then
 	HKL_ROOT=$1
 	#HIGHRES=$2
 else
-	echo "Usage: crystfel_make_hkl_and_stats <streamfile> <high resolution cut> "
+	echo "Usage: crystfel_make_hkl_and_stats <hkl file> res options in the scripts! also update the loc variable! (and the point group in this and the merge_kiiro_table1_063 script)"
 	exit 1
 fi
 #########################
@@ -75,12 +75,12 @@ compare_hkl ${HKL_FILENAME}1 ${HKL_FILENAME}2 -y $POINTGROUP -p $CELL_FILENAME -
 echo >>$PROCESSING_LOGFNAME3
 #########################
 # Place all stats in a file..
-# Need to have other script somewhere sensible! (crystfel_stats_merge.sh)
+# Need to have other script somewhere sensible!
 #########################
 echo "Combining statistics..."
-~/PycharmProjects/Crystal_Scripts/Cryst_FEL/merge_kiiro_table1_063_XFEL.sh ${FILES_BASENAME}_Rsplit_${HIGHRESTAG}.dat
-~/PycharmProjects/Crystal_Scripts/Cryst_FEL/merge_kiiro_table1_063_XFEL.sh ${FILES_BASENAME}_Rsplit_${HIGHRESTAG2}.dat
-~/PycharmProjects/Crystal_Scripts/Cryst_FEL/merge_kiiro_table1_063_XFEL.sh ${FILES_BASENAME}_Rsplit_${HIGHRESTAG3}.dat
+${loc}/merge_kiiro_table1_063_XFEL.sh ${FILES_BASENAME}_Rsplit_${HIGHRESTAG}.dat
+${loc}/merge_kiiro_table1_063_XFEL.sh ${FILES_BASENAME}_Rsplit_${HIGHRESTAG2}.dat
+${loc}/merge_kiiro_table1_063_XFEL.sh ${FILES_BASENAME}_Rsplit_${HIGHRESTAG3}.dat
 
 echo
 echo "crystfel_make_hkl_and_stats finished sucessfully."
