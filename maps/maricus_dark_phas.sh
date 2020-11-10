@@ -1,9 +1,9 @@
 #!/bin/bash
 loc="/home/james/PycharmProjects/Crystal_Scripts/maps"
 SYMM="173"
-if ["X$#" == "X5" ] ; then
+if ["X$#" == "X6" ] ; then
   pdb=$1 #DARK PDB
-  cell=$(${loc}/pdb_cell.sh $dark_model)
+  cell=$(${loc}/pdb_cell.sh $pdb)
   dark_FC=$2
   res_high=$3
   res_low=$4
@@ -21,16 +21,16 @@ light_FC="Light_extrapolated_coord_FC" # This is the name of the structure facto
 #refined_pdb="" #Coordinates that have been refined to the extrapolated map
 #dark_FC="" # This shouldbe the calculated structure factors form the dark model
 
-resmax=res_high
-scalmin=res_low
-mapmin=res_low
+resmax=$res_high
+scalmin=$res_low
+mapmin=$res_low
  # This should be the extrapolated map that was previoudly calculated using the dark phases
 
 sfall HKLIN $original_extrap_map XYZIN $refined_pdb HKLOUT $light_FC << eof-sfall
 # Set the mode for structure factor calc. from a xyzin
       MODE sfcalc hklin xyzin
-      CELL ${CELL}
-      LABIN FP=F_${name} SIGFP = SIGF_${name}
+      CELL ${cell}
+      LABIN FP=Fext SIGFP = sigF
       LABOUT FC=FC_${name} PHIC=PHIC_${name}
       RESOLUTION 37 $resmax
       symmetry ${SYMM}
@@ -38,9 +38,9 @@ sfall HKLIN $original_extrap_map XYZIN $refined_pdb HKLOUT $light_FC << eof-sfal
 eof-sfall
 
 cad HKLIN1 $dark_FC HKLIN2 $light_FC HKLOUT all.mtz << END-cad
-LABIN FILE 1 E1=FC_DARK E2=SIGF_DARK E3=PHIC_DARK
+LABIN FILE 1 E1=FC_D E2=SIG_FC_D E3=PHI_DARK
 CTYP  FILE 1 E1=F E2=Q E3=P
-LABIN FILE 2 E1=FC_${tim} E2=SIGF_${tim} E3=PHIC_${tim}
+LABIN FILE 2 E1=FC_${name} E2=SIGF_${name} E3=PHIC_${name}
 CTYP  FILE 2 E1=F E2=Q E3=P
 END
 END-cad
@@ -60,8 +60,7 @@ reso $scalmin $resmax      # Usually better to exclude lowest resolution data
 #Exclude FP data if: FP < 5*SIGFP & if FMAX > 1000000
 EXCLUDE FP SIG 4 FMAX 10000000
 #AUTO
-LABIN FP=FC_DARK SIGFP=SIGF_DARK
-  FPH1=FC_${tim} SIGFPH1=SIGF_${tim}
+LABIN FP=FC_DARK SIGFP=SIGF_DARK FPH1=FC_${name} SIGFPH1=SIGF_${name}
 CONV ABS 0.000001 TOLR  0.00000001 NCYC 100
 END
 END-scaleit1
@@ -100,7 +99,7 @@ ${loc}/progs/mock-dark < wmar.inp
 
 #get files back into mtz
 f2mtz HKLIN ${name}_dark_calc.phs HKLOUT ${name}_dphs.mtz << end_weight
-CELL ${CELL
+CELL ${cell}
 SYMM ${SYMM}
 LABOUT H   K  L   FC_D_L DUM  DPHI
 CTYPE  H   H  H   F       Q    P

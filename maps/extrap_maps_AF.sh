@@ -5,7 +5,7 @@ if [ ! -d $loc ]; then echo "$loc not found!" && exit 1 ; fi
 SYMM="173"
 bin_nam="1_12k_0pol"
 
-if ["X$#" == "X5" ] ; then
+if [  "X$#" == "X5" ] ; then
   dark_model=$1
   cell=$(${loc}/pdb_cell.sh $dark_model)
   res_high=$2
@@ -37,36 +37,36 @@ ${loc}fc+fwv3 < add.inp
 
 ##
 # Here gernate the new phases
-${loc}/maricus_dark_phas.sh $dark_model dark_phase.hkl $res_high $res_low $extrap_mtz $extrap_coords
+${loc}/maricus_dark_phas.sh $dark_model FC_dark.mtz $res_high $res_low $extrap_mtz $extrap_coords
 # Some awks to put the phases we just calcualted into the extrapolated hkl file from the fc+fwx3 program
 awk '{printf "%5i%5i%5i%12.3f%12.3f\n",$1, $2, $3, $4, $5}' darkFC_extrap.hkl > tmp
 awk '{printf "%12.3f\n", $6}' ${bin_nam}_dark_calc.phs > tmp1
 mv  darkFC_extrap.hkl darkFC_extrap_OG_PHASES.hkl
 paste tmp tmp1 >> darkFC_extrap.hkl
 
-f2mtz HKLIN darkFC_extrap.hkl HKLOUT dummy.mtz >log << end_weight
+f2mtz HKLIN darkFC_extrap.hkl HKLOUT dummy.mtz << end_weight
    CELL ${cell}
     SYMM ${SYMM}
-    LABOUT H      K    L      Fext    sigF    PHI
-    CTYPE    H      H    H      F          Q        P
+    LABOUT H K L Fext sigF PHI
+    CTYPE  H H H F Q P
     END
 end_weight
 
-cad HKLIN1 dummy.mtz HKLOUT marius_ext1.mtz << end_cad
+cad HKLIN1 dummy.mtz HKLOUT marius_ext.mtz << end_cad
     LABIN FILE 1 E1=Fext E2=sigF E3=PHI
-    CTYPE    FILE 1 E1=F E2=Q E3=P
+    CTYPE FILE 1 E1=F E2=Q E3=P
     RESO FILE 1 $reslow $reshigh
 end_cad
 
 rm dz
 
-freerflag HKLIN marius_ext1.mtz HKLOUT marius_ext.mtz << end_free
-    freerfrac 0.05
-end_free
+#freerflag HKLIN marius_ext1.mtz HKLOUT marius_ext.mtz << end_free
+#    freerfrac 0.05
+#end_free
 
 
 
-fft HKLIN marius_ext.mtz MAPOUT neg_map.map    >log << END-wfft
+fft HKLIN marius_ext.mtz MAPOUT neg_map.map<< END-wfft
     RESO $res_low $res_high
     SCALE F1 1.0 0.0
     GRID 160 160 140
