@@ -11,12 +11,12 @@ fi
 #########################
 # Edits here:
 #########################
-CELL_FILENAME="/dls/i24/data/2020/mx19458-39/processing/crystFEL/store/rsKiiro_refined.cell"
+CELL_FILENAME="/home/james/data/crystallography/2019_05_p14/tables/files/crystfel_cell.cell"
 POINTGROUP="mmm"
 #SPACEGROUP="P212121"
 #cell=" 39.60 74.44 78.92" # pH8 400
 PROCESSHKL_OPTIONS=" --scale --push-res=0.5"
-loc="." # This should be pointing to the directory of crystfel_stats_merge.sh no need for a / to follow
+loc="${HOME}/PycharmProjects/Crystal_Scripts/Cryst_FEL/" # This should be pointing to the directory of crystfel_stats_merge.sh no need for a / to follow
 
 #########################
 #Check files exist and make some names..
@@ -144,3 +144,5 @@ mv *.dat dat
 #mv dat/*statsummary* .
 #echo " Number of crystals:" >> *statsummary* && number_indexed_images streams/detwinned_${STREAM_FILENAME} >> *statsummary*
 rm PLOT
+cd dat/
+${loc}/merge_kiiro_table1_090_XFEL.sh ${HKL_FILENAME}

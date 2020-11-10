@@ -23,7 +23,7 @@ TEMP_SNR=$(   mktemp -p /tmp mergestats_SNR.XXXXXXXXXX)
 NUM_TOTAL_MEAS=$(grep " measurements in total.$" $FILENAME_LOG | sed -e 's| measurements in total.||g' )
 NUM_TOTAL_REFL=$(grep " reflections in total.$"  $FILENAME_LOG | sed -e 's| reflections in total.||g' )
 OVERALL_REDUNDANCY=$(printf "%.1f" $(echo $NUM_TOTAL_MEAS/$NUM_TOTAL_REFL | bc -l) )
-Number_images=0   #$(/dls/i24/data/2020/mx19458-39/processing/crystFEL/store/indexed_filenames  ../streams/*.stream | wc -l)
+Number_images=$(grep 'Begin cry' ../*.stream | wc -l)   #$(/dls/i24/data/2020/mx19458-39/processing/crystFEL/store/indexed_filenames  ../streams/*.stream | wc -l)
 
 SUM_MEASURED=$(cut -b 11-20 $FILENAME_SNR | tail -n +2| tr '\n' '+' | sed -e 's|+$| \n|g' | bc -l )
 SUM_POSSIBLE=$(cut -b 20-29 $FILENAME_SNR | tail -n +2| tr '\n' '+' | sed -e 's|+$| \n|g' | bc -l )
